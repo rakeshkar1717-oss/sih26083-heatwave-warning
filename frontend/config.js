@@ -5,13 +5,27 @@
  * with graceful fallback for standalone static web servers.
  */
 
+function resolveApiBaseUrl() {
+  try {
+    const envUrl = import.meta.env?.VITE_API_BASE_URL;
+    if (typeof envUrl === "string" && envUrl.trim().length > 0) {
+      return envUrl.trim();
+    }
+  } catch (_) {}
+
+  if (typeof window !== "undefined" && window.location) {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+      return "http://127.0.0.1:8000";
+    }
+  }
+
+  return "https://heatwave-api.onrender.com";
+}
+
 export const config = {
-  // Backend API Base URL (smart production auto-resolution)
-  apiBaseUrl: (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE_URL)
-    ? import.meta.env.VITE_API_BASE_URL
-    : (typeof window !== "undefined" && window.location && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1")
-      ? "https://heatwave-api.onrender.com"
-      : "http://127.0.0.1:8000",
+  // Backend API Base URL (robust production auto-resolution)
+  apiBaseUrl: resolveApiBaseUrl(),
 
   // Demo Pilot City Center Coordinates (Ahmedabad Municipal Corporation)
   city: {
