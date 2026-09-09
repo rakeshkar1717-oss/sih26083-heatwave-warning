@@ -813,3 +813,126 @@ header {
   font-size: 0.78rem !important;
   padding: 4px 12px !important;
 }
+
+/* Leaflet Ward Popup Styling (Compact & Clean) */
+.leaflet-popup-content-wrapper {
+  background: #131b2e !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.7) !important;
+  padding: 4px !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px !important;
+  line-height: 1.4 !important;
+  width: 270px !important;
+}
+
+.leaflet-popup-tip {
+  background: #131b2e !important;
+  border: 1px solid #334155 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  padding: 6px 8px 0 0 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #ffffff !important;
+}
+
+.ward-popup-card {
+  font-family: inherit;
+  width: 100%;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #273553;
+  padding-bottom: 4px;
+}
+
+.popup-header h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.popup-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.popup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.popup-grid .metric {
+  background: #1e293b;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.popup-grid .metric label {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.popup-grid .metric span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.popup-chart-container {
+  width: 100% !important;
+  height: 90px !important;
+  max-height: 90px !important;
+  position: relative !important;
+  margin: 6px 0 !important;
+  background: #0f172a;
+  border-radius: 6px;
+  padding: 4px;
+}
+
+.popup-chart-container canvas {
+  width: 100% !important;
+  height: 68px !important;
+  max-height: 68px !important;
+  display: block;
+}
+
+.popup-chart-container .chart-title {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.popup-advisory {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  line-height: 1.35;
+  margin-top: 6px;
+  background: rgba(30, 41, 59, 0.7);
+  padding: 6px 8px;
+  border-radius: 6px;
+  border-left: 3px solid #f59e0b;
+}

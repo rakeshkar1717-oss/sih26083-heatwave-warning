@@ -45,10 +45,10 @@ function initMap() {
   // Add zoom control in top-right
   L_inst.control.zoom({ position: "topright" }).addTo(state.map);
 
-  // High-contrast Dark Basemap
-  L_inst.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap contributors',
-    maxZoom: 19,
+  // High-contrast Dark Basemap (Clean & watermark-free)
+  L_inst.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+    attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap contributors',
+    maxZoom: 16,
   }).addTo(state.map);
 
   // Add Risk Legend Control
@@ -327,33 +327,42 @@ async function renderPopupForecastChart(props, popupElem) {
       labels: labels,
       datasets: [
         {
+          label: "Risk Score",
           data: riskData,
           borderColor: "#38bdf8",
           backgroundColor: "rgba(56, 189, 248, 0.2)",
           fill: true,
           tension: 0.3,
-          pointRadius: 2,
+          pointRadius: 3,
+          pointHoverRadius: 5,
           borderWidth: 2,
         },
       ],
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
+      maintainAspectRatio: true,
+      aspectRatio: 3.2,
+      animation: { duration: 250 },
       scales: {
         y: {
           min: 0,
           max: 1.0,
-          grid: { color: "#273553" },
-          ticks: { color: "#94a3b8", font: { size: 9 }, stepSize: 0.5 },
+          grid: { color: "#1e293b" },
+          ticks: { color: "#94a3b8", font: { size: 8 }, stepSize: 0.5 },
         },
         x: {
           grid: { display: false },
-          ticks: { color: "#94a3b8", font: { size: 9 } },
+          ticks: { color: "#94a3b8", font: { size: 8 } },
         },
       },
       plugins: {
         legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (item) => `Predicted Risk: ${item.parsed.y.toFixed(2)}`,
+          },
+        },
       },
     },
   });

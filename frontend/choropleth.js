@@ -125,15 +125,15 @@ export function createChoroplethLayer(geojsonData, options = {}) {
           <div class="metric"><label>Risk Score</label><span>${props.final_risk_score != null ? props.final_risk_score.toFixed(2) : "N/A"}</span></div>
         </div>
         <div class="popup-chart-container">
-          <div class="chart-title">5-Day Risk Trend Projections</div>
-          <canvas id="popup-chart-${props.ward_id}" width="260" height="120"></canvas>
+          <div class="chart-title">5-Day Risk Trend Forecast</div>
+          <canvas id="popup-chart-${props.ward_id}" width="260" height="75"></canvas>
         </div>
         <div class="popup-advisory">
           <small>${props.advisory || "Standard heat precautions recommended."}</small>
         </div>
       `;
 
-      layer.bindPopup(popupContent, { maxWidth: 320, minWidth: 280 });
+      layer.bindPopup(popupContent, { maxWidth: 290, minWidth: 260, autoPan: true });
 
       layer.on("popupopen", (e) => {
         onPopupOpen(props, popupContent);
