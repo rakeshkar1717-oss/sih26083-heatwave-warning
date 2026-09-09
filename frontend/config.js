@@ -6,10 +6,12 @@
  */
 
 export const config = {
-  // Backend API Base URL
+  // Backend API Base URL (smart production auto-resolution)
   apiBaseUrl: (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE_URL)
     ? import.meta.env.VITE_API_BASE_URL
-    : "http://127.0.0.1:8000",
+    : (typeof window !== "undefined" && window.location && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1")
+      ? "https://heatwave-api.onrender.com"
+      : "http://127.0.0.1:8000",
 
   // Demo Pilot City Center Coordinates (Ahmedabad Municipal Corporation)
   city: {

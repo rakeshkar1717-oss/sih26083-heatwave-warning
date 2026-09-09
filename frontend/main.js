@@ -97,7 +97,9 @@ async function updateSystemStatus() {
     }
   } catch (err) {
     pill.className = "status-pill status-offline";
-    text.textContent = "🔴 API Offline";
+    text.textContent = "🟡 Waking up server...";
+    // Automatically re-check status in 4 seconds
+    setTimeout(updateSystemStatus, 4000);
   }
 }
 
