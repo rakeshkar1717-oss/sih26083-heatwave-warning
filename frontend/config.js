@@ -21,6 +21,13 @@ export const config = {
     defaultZoom: 12,
   },
 
+  // National View Coordinates (All India - 35 States & UTs)
+  india: {
+    name: "India",
+    center: [22.8, 80.0],
+    defaultZoom: 5,
+  },
+
   // Auto-Refresh interval for live health & telemetry polling (in ms)
   pollIntervalMs: 60000,
 

@@ -81,10 +81,16 @@ export function createChoroplethLayer(geojsonData, options = {}) {
     onEachFeature: (feature, layer) => {
       const props = feature.properties || {};
 
+      const entityName = props.ward_name || props.state_name || "Unknown Region";
+      const entityId = props.ward_id || props.state_id || "";
+      const isState = !!props.state_id;
+      const isGujarat = isState && (props.state_name === "Gujarat" || props.state_id === "IN_GJ");
+
       // Hover Tooltip
       layer.bindTooltip(
-        `<strong>${props.ward_name}</strong> (${props.ward_id})<br/>` +
-        `Risk: <span style="font-weight:700;color:${props.color || getRiskColor(props.risk_level)}">${props.risk_level}</span>`,
+        `<strong>${entityName}</strong> ${entityId ? `(${entityId})` : ''}<br/>` +
+        `Risk: <span style="font-weight:700;color:${props.color || getRiskColor(props.risk_level)}">${props.risk_level}</span>` +
+        (isGujarat ? `<br/><span style="color:#38bdf8;font-size:0.75rem;">👉 Click to Drill Down to Ahmedabad</span>` : ''),
         { sticky: true, direction: "top", className: "ward-tooltip" }
       );
 
@@ -110,12 +116,12 @@ export function createChoroplethLayer(geojsonData, options = {}) {
         },
       });
 
-      // Ward Popup with Embedded Canvas for Forecast Chart
+      // Ward / State Popup with Embedded Canvas for Forecast Chart
       const popupContent = document.createElement("div");
       popupContent.className = "ward-popup-card";
       popupContent.innerHTML = `
         <div class="popup-header">
-          <h4>${props.ward_name}</h4>
+          <h4>${entityName}</h4>
           <span class="popup-badge" style="background:${props.color || getRiskColor(props.risk_level)}">${props.risk_level}</span>
         </div>
         <div class="popup-grid">
@@ -124,9 +130,15 @@ export function createChoroplethLayer(geojsonData, options = {}) {
           <div class="metric"><label>HVI</label><span>${props.vulnerability_score != null ? props.vulnerability_score.toFixed(2) : "N/A"}</span></div>
           <div class="metric"><label>Risk Score</label><span>${props.final_risk_score != null ? props.final_risk_score.toFixed(2) : "N/A"}</span></div>
         </div>
+        ${isGujarat ? `
+        <div class="popup-drilldown-row">
+          <button class="btn-drilldown-popup" onclick="window.drillDownToAhmedabad && window.drillDownToAhmedabad()">
+            🏙️ Drill Down to Ahmedabad (48 Wards) &rarr;
+          </button>
+        </div>` : ''}
         <div class="popup-chart-container">
-          <div class="chart-title">5-Day Risk Trend Forecast</div>
-          <canvas id="popup-chart-${props.ward_id}" width="260" height="75"></canvas>
+          <div class="chart-title">${isState ? "Predicted 5-Day Heat Trend" : "5-Day Risk Trend Forecast"}</div>
+          <canvas id="popup-chart-${entityId}" width="260" height="75"></canvas>
         </div>
         <div class="popup-advisory">
           <small>${props.advisory || "Standard heat precautions recommended."}</small>

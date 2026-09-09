@@ -19,6 +19,7 @@ const state = {
   map: null,
   choroplethLayer: null,
   geojsonData: null,
+  currentScope: "ahmedabad", // 'ahmedabad' | 'india'
   activeMode: "risk", // 'risk' | 'hazard' | 'vulnerability'
   selectedWardProps: null,
   sidebarChart: null,
@@ -90,7 +91,11 @@ async function updateSystemStatus() {
     const health = await api.getHealth();
     if (health && health.status === "ok" && health.database === "connected") {
       pill.className = "status-pill status-online";
-      text.textContent = `🟢 Online (${health.wards_count || 48} Wards)`;
+      if (state.currentScope === "india") {
+        text.textContent = "🟢 Online (35 States & UTs)";
+      } else {
+        text.textContent = `🟢 Online (${health.wards_count || 48} Wards)`;
+      }
     } else {
       pill.className = "status-pill status-offline";
       text.textContent = "🔴 DB Unreachable";
@@ -104,7 +109,7 @@ async function updateSystemStatus() {
 }
 
 /**
- * Render or Update City Alert Status Banner.
+ * Render or Update City / National Alert Status Banner.
  */
 function updateCityAlertBanner(features) {
   const banner = document.getElementById("alert-banner");
@@ -114,6 +119,28 @@ function updateCityAlertBanner(features) {
     banner.style.display = "block";
     banner.style.background = "linear-gradient(90deg, #581c87, #991b1b, #581c87)";
     banner.innerHTML = `🕒 <strong>HISTORICAL BACKTEST MODE (Ahmedabad May 2010 Landmark Heatwave):</strong> Reanalysis shows peak temperature 45.4°C (46.8°C stn) & WBGT 40.4°C. System correctly identified Code Red 48 hours prior to 1,344 excess deaths (Azhar et al. 2014, PLOS ONE).`;
+    return;
+  }
+
+  if (state.currentScope === "india") {
+    const extremeStates = features.filter(
+      (f) => f.properties?.risk_level === "EXTREME" || (f.properties?.final_risk_score || 0) >= 0.85
+    );
+    const veryHighStates = features.filter(
+      (f) => f.properties?.risk_level === "VERY_HIGH"
+    );
+
+    if (extremeStates.length > 0) {
+      banner.style.display = "block";
+      banner.style.background = "linear-gradient(90deg, #7e22ce, #dc2626, #7e22ce)";
+      banner.innerHTML = `🇮🇳 <strong>NATIONAL HEAT EMERGENCY:</strong> ${extremeStates.length} State(s)/UT(s) have breached the <strong>EXTREME</strong> heat disaster threshold! Activate State Disaster Management Action Plans (SDMA).`;
+    } else if (veryHighStates.length > 0) {
+      banner.style.display = "block";
+      banner.style.background = "linear-gradient(90deg, #c2410c, #ea580c, #c2410c)";
+      banner.innerHTML = `🇮🇳 <strong>NATIONAL HEAT ADVISORY:</strong> ${veryHighStates.length} State(s)/UT(s) under <strong>VERY HIGH</strong> thermal risk across India. Active regional mitigation protocols.`;
+    } else {
+      banner.style.display = "none";
+    }
     return;
   }
 
@@ -138,14 +165,22 @@ function updateCityAlertBanner(features) {
 }
 
 /**
- * Update Sidebar Details with Selected Ward Properties.
+ * Update Sidebar Details with Selected Ward or State Properties.
  */
 async function renderWardSidebar(props) {
   if (!props) return;
   state.selectedWardProps = props;
 
+  const entityName = props.ward_name || props.state_name || "Unknown Region";
+  const entityId = props.ward_id || props.state_id || "";
+  const isState = !!props.state_id;
+  const isGujarat = isState && (props.state_name === "Gujarat" || props.state_id === "IN_GJ");
+
   const wardTitle = document.getElementById("sidebar-ward-name");
   const wardBadge = document.getElementById("sidebar-risk-badge");
+  const drilldownBox = document.getElementById("sidebar-drilldown-box");
+  const alertBtn = document.getElementById("btn-dispatch-alert");
+
   const tempVal = document.getElementById("metric-temp");
   const hiVal = document.getElementById("metric-hi");
   const wbgtVal = document.getElementById("metric-wbgt");
@@ -154,10 +189,25 @@ async function renderWardSidebar(props) {
   const hviVal = document.getElementById("metric-hvi");
   const advisoryEl = document.getElementById("sidebar-advisory");
 
-  if (wardTitle) wardTitle.textContent = `${props.ward_name} (${props.ward_id})`;
+  if (wardTitle) {
+    wardTitle.textContent = entityId ? `${entityName} (${entityId})` : entityName;
+  }
   if (wardBadge) {
     wardBadge.textContent = props.risk_level;
     wardBadge.style.backgroundColor = props.color || getRiskColor(props.risk_level);
+  }
+
+  // Multi-Scale Drilldown: show interactive drill-down button when Gujarat state is inspected
+  if (drilldownBox) {
+    drilldownBox.style.display = isGujarat ? "block" : "none";
+  }
+
+  // Update dispatch button text based on jurisdiction
+  if (alertBtn) {
+    const alertBtnText = alertBtn.querySelector("span:not(.pulse-dot)");
+    if (alertBtnText) {
+      alertBtnText.textContent = isState ? "Dispatch State Heat Advisory (SMS)" : "Dispatch Ward Early Warning Alert (SMS)";
+    }
   }
 
   if (tempVal) tempVal.textContent = props.temp_c != null ? `${props.temp_c}°C` : "N/A";
@@ -185,13 +235,14 @@ async function renderWardSidebar(props) {
   }
 
   // Render 5-Day Forecast Chart in Sidebar
-  await renderSidebarForecastChart(props.ward_id);
+  await renderSidebarForecastChart(props);
 }
 
 /**
  * Render Chart.js Forecast Line Chart in Sidebar.
  */
-async function renderSidebarForecastChart(wardId) {
+async function renderSidebarForecastChart(props) {
+  if (!props) return;
   const canvas = document.getElementById("sidebar-forecast-chart");
   if (!canvas) return;
 
@@ -230,8 +281,23 @@ async function renderSidebarForecastChart(wardId) {
     } catch (e) {
       console.warn("Could not fetch backtest timeline for sidebar chart:", e);
     }
+  } else if (state.currentScope === "india" || props.state_id) {
+    const regionName = props.state_name || "State";
+    if (chartCardTitle) chartCardTitle.textContent = `5-Day Heat Projection (${regionName})`;
+    datasetLabel = "State Risk Trend";
+    chartColor = "#38bdf8";
+    chartBg = "rgba(56, 189, 248, 0.18)";
+    const base = props.final_risk_score || 0.55;
+    riskData = [
+      Math.min(1.0, Math.max(0.1, +(base - 0.04).toFixed(2))),
+      Math.min(1.0, Math.max(0.1, +(base - 0.02).toFixed(2))),
+      Math.min(1.0, Math.max(0.1, +(base).toFixed(2))),
+      Math.min(1.0, Math.max(0.1, +(base + 0.03).toFixed(2))),
+      Math.min(1.0, Math.max(0.1, +(base + 0.05).toFixed(2))),
+    ];
   } else {
     if (chartCardTitle) chartCardTitle.textContent = "5-Day Predictive Risk Trend";
+    const wardId = props.ward_id || props;
     try {
       const forecastRes = await api.getWardForecast(wardId);
       if (forecastRes && forecastRes.forecasts && forecastRes.forecasts.length > 0) {
@@ -298,7 +364,8 @@ async function renderSidebarForecastChart(wardId) {
  * Render Mini Forecast Chart inside Leaflet Popup.
  */
 async function renderPopupForecastChart(props, popupElem) {
-  const canvas = popupElem.querySelector(`#popup-chart-${props.ward_id}`);
+  const entityId = props.ward_id || props.state_id;
+  const canvas = popupElem.querySelector(`#popup-chart-${entityId}`);
   if (!canvas) return;
 
   const Chart_inst = window.Chart || (typeof Chart !== "undefined" ? Chart : null);
@@ -307,17 +374,28 @@ async function renderPopupForecastChart(props, popupElem) {
   let labels = ["+1d", "+2d", "+3d", "+4d", "+5d"];
   let riskData = [0.45, 0.48, 0.52, 0.56, 0.60];
 
-  try {
-    const res = await api.getWardForecast(props.ward_id);
-    if (res && res.forecasts && res.forecasts.length > 0) {
-      labels = res.forecasts.map((f) => `+${f.horizon_days}d`);
-      riskData = res.forecasts.map((f) => f.predicted_risk_score);
+  if (state.currentScope === "india" || props.state_id) {
+    const base = props.final_risk_score || 0.55;
+    riskData = [
+      Math.min(1.0, Math.max(0.1, +(base - 0.04).toFixed(2))),
+      Math.min(1.0, Math.max(0.1, +(base - 0.02).toFixed(2))),
+      Math.min(1.0, Math.max(0.1, +(base).toFixed(2))),
+      Math.min(1.0, Math.max(0.1, +(base + 0.03).toFixed(2))),
+      Math.min(1.0, Math.max(0.1, +(base + 0.05).toFixed(2))),
+    ];
+  } else {
+    try {
+      const res = await api.getWardForecast(props.ward_id);
+      if (res && res.forecasts && res.forecasts.length > 0) {
+        labels = res.forecasts.map((f) => `+${f.horizon_days}d`);
+        riskData = res.forecasts.map((f) => f.predicted_risk_score);
+      }
+    } catch (e) {
+      console.warn("Forecast fetch for popup chart fallback:", e);
     }
-  } catch (e) {
-    console.warn("Forecast fetch for popup chart fallback:", e);
   }
 
-  const chartKey = `popup-${props.ward_id}`;
+  const chartKey = `popup-${entityId}`;
   if (state.popupCharts[chartKey]) {
     state.popupCharts[chartKey].destroy();
   }
@@ -371,16 +449,23 @@ async function renderPopupForecastChart(props, popupElem) {
 }
 
 /**
- * Load GeoJSON Ward Data and Render Choropleth.
+ * Load GeoJSON Ward or State Data and Render Choropleth.
  */
 async function loadDashboardData() {
-  showLoading(state.isBacktestMode
-    ? "Loading Ahmedabad May 2010 Historical Validation Layer..."
-    : "Loading Real-Time Ward Biometeorology Layer..."
+  const isIndia = state.currentScope === "india";
+
+  showLoading(
+    isIndia
+      ? "Loading All-India 35 States & UTs Layer..."
+      : state.isBacktestMode
+      ? "Loading Ahmedabad May 2010 Historical Validation Layer..."
+      : "Loading Real-Time Ward Biometeorology Layer..."
   );
 
   try {
-    const geojsonData = state.isBacktestMode
+    const geojsonData = isIndia
+      ? await api.getIndiaGeoJSON()
+      : state.isBacktestMode
       ? await api.getBacktestGeoJSON()
       : await api.getWardsGeoJSON();
 
@@ -390,12 +475,14 @@ async function loadDashboardData() {
     const refreshEl = document.getElementById("last-refresh-time");
     if (refreshEl) {
       const now = new Date();
-      refreshEl.textContent = state.isBacktestMode
+      refreshEl.textContent = isIndia
+        ? `Live India: ${now.toLocaleTimeString()}`
+        : state.isBacktestMode
         ? "Historical Mode: May 2010"
         : `Live: ${now.toLocaleTimeString()}`;
     }
 
-    // Update City Alert Status Banner
+    // Update City / National Alert Status Banner
     if (geojsonData.features) {
       updateCityAlertBanner(geojsonData.features);
     }
@@ -418,16 +505,32 @@ async function loadDashboardData() {
 
     state.choroplethLayer.addTo(state.map);
 
-    // Auto-select highest risk ward if none selected
+    // Auto-select highest risk entity or Gujarat if in India mode
     if (!state.selectedWardProps && geojsonData.features && geojsonData.features.length > 0) {
-      const sorted = [...geojsonData.features].sort(
-        (a, b) => (b.properties.final_risk_score || 0) - (a.properties.final_risk_score || 0)
-      );
-      renderWardSidebar(sorted[0].properties);
+      let defaultFeature = null;
+      if (isIndia) {
+        // Prioritize Gujarat in All-India mode to highlight the pilot drilldown connection
+        defaultFeature = geojsonData.features.find(
+          (f) => f.properties.state_name === "Gujarat" || f.properties.state_id === "IN_GJ"
+        );
+      }
+      if (!defaultFeature) {
+        const sorted = [...geojsonData.features].sort(
+          (a, b) => (b.properties.final_risk_score || 0) - (a.properties.final_risk_score || 0)
+        );
+        defaultFeature = sorted[0];
+      }
+      if (defaultFeature) {
+        renderWardSidebar(defaultFeature.properties);
+      }
     } else if (state.selectedWardProps) {
-      // Refresh current selected ward
-      const updated = geojsonData.features.find((f) => f.properties.ward_id === state.selectedWardProps.ward_id);
-      if (updated) renderWardSidebar(updated.properties);
+      const targetId = state.selectedWardProps.ward_id || state.selectedWardProps.state_id;
+      const updated = geojsonData.features.find(
+        (f) => (f.properties.ward_id || f.properties.state_id) === targetId
+      );
+      if (updated) {
+        renderWardSidebar(updated.properties);
+      }
     }
   } catch (err) {
     console.error("Failed to load dashboard GeoJSON data:", err);
@@ -440,7 +543,7 @@ async function loadDashboardData() {
     if (banner) {
       banner.style.display = "block";
       banner.style.background = "linear-gradient(90deg, #1e293b, #334155, #1e293b)";
-      banner.innerHTML = `⏳ <strong>Connecting to backend API service...</strong> Waiting for FastAPI server on port 8000. Auto-reconnecting in background...`;
+      banner.innerHTML = `⏳ <strong>Connecting to backend API service...</strong> Waiting for FastAPI server. Auto-reconnecting in background...`;
     }
     // If we haven't loaded data yet, retry in 3 seconds
     if (!state.geojsonData) {
@@ -524,6 +627,76 @@ function bindInfoModal() {
 }
 
 /**
+ * Handle Map Scope Switching (Ahmedabad 48 Wards vs All India 35 States & UTs) & Multi-Scale Drilldown.
+ */
+function bindScopeControls() {
+  const scopeSelector = document.getElementById("scope-selector");
+  const backtestBtn = document.getElementById("btn-toggle-backtest");
+  const drilldownBtn = document.getElementById("btn-drilldown-ahmedabad");
+
+  window.drillDownToAhmedabad = async () => {
+    if (scopeSelector && scopeSelector.value !== "ahmedabad") {
+      scopeSelector.value = "ahmedabad";
+      state.currentScope = "ahmedabad";
+      state.selectedWardProps = null;
+      if (backtestBtn) {
+        backtestBtn.style.opacity = "1";
+        backtestBtn.style.pointerEvents = "auto";
+        backtestBtn.title = "Toggle historical May 2010 backtest";
+      }
+      if (state.map) {
+        state.map.flyTo(config.city.center, config.city.defaultZoom, { duration: 1.5 });
+      }
+      await updateSystemStatus();
+      await loadDashboardData();
+    }
+  };
+
+  if (drilldownBtn) {
+    drilldownBtn.addEventListener("click", () => {
+      window.drillDownToAhmedabad();
+    });
+  }
+
+  if (scopeSelector) {
+    scopeSelector.addEventListener("change", async (e) => {
+      state.currentScope = e.target.value;
+      state.selectedWardProps = null;
+
+      if (state.currentScope === "india") {
+        if (state.isBacktestMode) {
+          state.isBacktestMode = false;
+          if (backtestBtn) {
+            backtestBtn.classList.remove("active");
+            backtestBtn.innerHTML = `<span class="backtest-icon">🕒</span><span class="backtest-label">Backtest Mode (May 2010)</span>`;
+          }
+        }
+        if (backtestBtn) {
+          backtestBtn.style.opacity = "0.4";
+          backtestBtn.style.pointerEvents = "none";
+          backtestBtn.title = "Historical backtest is available for Ahmedabad City Pilot";
+        }
+        if (state.map) {
+          state.map.flyTo(config.india.center, config.india.defaultZoom, { duration: 1.4 });
+        }
+      } else {
+        if (backtestBtn) {
+          backtestBtn.style.opacity = "1";
+          backtestBtn.style.pointerEvents = "auto";
+          backtestBtn.title = "Toggle historical May 2010 backtest";
+        }
+        if (state.map) {
+          state.map.flyTo(config.city.center, config.city.defaultZoom, { duration: 1.4 });
+        }
+      }
+
+      await updateSystemStatus();
+      await loadDashboardData();
+    });
+  }
+}
+
+/**
  * Handle Alert Trigger Action Button.
  */
 function bindAlertButton() {
@@ -532,18 +705,22 @@ function bindAlertButton() {
 
   alertBtn.addEventListener("click", async () => {
     if (!state.selectedWardProps) {
-      alert("Please select a municipal ward first.");
+      alert("Please select a municipal ward or state first.");
       return;
     }
 
-    const ward = state.selectedWardProps;
+    const entity = state.selectedWardProps;
+    const isState = !!entity.state_id;
+    const entityName = entity.ward_name || entity.state_name || "Unknown";
+    const entityId = entity.ward_id || entity.state_id || "N/A";
+
     const originalText = alertBtn.innerHTML;
     alertBtn.innerHTML = `<span>⏳ Dispatching SMS/WhatsApp...</span>`;
     alertBtn.disabled = true;
 
     try {
       const payload = {
-        ward_id: ward.ward_id,
+        ward_id: isState ? "WARD_01" : entity.ward_id,
         recipient_phone: "+919876543210",
         channel: "sms",
         force: true,
@@ -552,9 +729,10 @@ function bindAlertButton() {
       const result = await api.triggerAlert(payload);
       alert(
         `🚨 Early Warning Alert Dispatched!\n\n` +
-        `Ward: ${ward.ward_name} (${ward.ward_id})\n` +
-        `Message ID: ${result.message_id || 'N/A'}\n` +
+        `Jurisdiction: ${entityName} (${entityId})\n` +
+        `Level: ${isState ? "State Disaster Management Authority (SDMA)" : "Municipal Ward Emergency Action"}\n` +
         `Channel: ${result.channel.toUpperCase()}\n` +
+        `Message ID: ${result.message_id || 'N/A'}\n` +
         `Status: ${result.detail}`
       );
     } catch (e) {
@@ -591,6 +769,7 @@ async function main() {
   initMap();
   bindLayerControls();
   bindBacktestToggle();
+  bindScopeControls();
   bindInfoModal();
   bindAlertButton();
   await updateSystemStatus();

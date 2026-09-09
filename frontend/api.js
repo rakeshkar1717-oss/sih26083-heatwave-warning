@@ -111,3 +111,12 @@ export async function getBacktestGeoJSON() {
   const response = await fetch(`${BASE_URL}/api/backtest/geojson`);
   return handleResponse(response);
 }
+
+/**
+ * Retrieve All-India 35 States & UTs GeoJSON FeatureCollection with joined thermal risk attributes.
+ * GET /api/india/geojson
+ */
+export async function getIndiaGeoJSON() {
+  const response = await fetch(`${BASE_URL}/api/india/geojson`);
+  return handleResponse(response);
+}

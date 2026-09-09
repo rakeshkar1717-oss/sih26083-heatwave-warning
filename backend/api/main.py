@@ -148,6 +148,7 @@ def root() -> Dict[str, Any]:
         "target_city": settings.default_city,
         "endpoints": [
             "/api/wards/geojson",
+            "/api/india/geojson",
             "/api/risk/{ward_id}",
             "/api/weather/{ward_id}",
             "/api/forecast/{ward_id}",
@@ -267,6 +268,36 @@ def get_wards_geojson(db: Session = Depends(get_db)) -> Dict[str, Any]:
         "total_wards": len(features),
         "features": features,
     }
+
+
+_INDIA_GEOJSON_CACHE: Optional[Dict[str, Any]] = None
+
+
+@app.get("/api/india/geojson")
+def get_india_geojson() -> Dict[str, Any]:
+    """Retrieve GeoJSON FeatureCollection of all Indian States and Union Territories.
+
+    Contains regional biometeorological hazard metrics, WBGT, Heat Index, and HVI demographic vulnerability.
+    """
+    global _INDIA_GEOJSON_CACHE
+    if _INDIA_GEOJSON_CACHE is not None:
+        return _INDIA_GEOJSON_CACHE
+
+    from backend.config import RAW_DATA_DIR, BASE_DIR
+    india_geojson_path = RAW_DATA_DIR / "india_states.geojson"
+    if not india_geojson_path.exists():
+        india_geojson_path = BASE_DIR / "data" / "raw" / "india_states.geojson"
+
+    if not india_geojson_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="India regional GeoJSON dataset not found. Please verify data/raw/india_states.geojson.",
+        )
+
+    with open(india_geojson_path, "r", encoding="utf-8") as f:
+        _INDIA_GEOJSON_CACHE = json.load(f)
+
+    return _INDIA_GEOJSON_CACHE
 
 
 @app.get("/api/risk/{ward_id}", response_model=WardRiskScore)
