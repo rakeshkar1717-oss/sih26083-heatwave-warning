@@ -1,4 +1,4 @@
-﻿# SIH26083: Extreme Heatwave Early Warning & Human Thermal Stress Platform
+# SIH26083: Extreme Heatwave Early Warning & Human Thermal Stress Platform
 
 [![Python Version](https://img.shields.io/badge/Python-3.11%20%7C%203.14-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -181,9 +181,9 @@ The platform is designed to deploy on 100% free cloud tiers with zero committed 
 * **Deployment Guide**: See [`DEPLOY.md`](DEPLOY.md) for step-by-step click paths and environment variable settings.
 
 ### 3-Tier Presentation Fallback Plan:
-1. **Plan A**: Live Cloud URL (e.g. `https://sih-heatwave.vercel.app`).
-2. **Plan B**: Local single-click execution via `start_demo.bat` (works 100% offline).
-3. **Plan C**: 2-minute pre-recorded video walkthrough ([`docs/VIDEO_SHOTLIST.md`](docs/VIDEO_SHOTLIST.md)).
+1. **Plan A (Live Cloud URL)**: [https://sih-heatwave-projection.vercel.app](https://sih-heatwave-projection.vercel.app) (Backend: [https://heatwave-api.onrender.com](https://heatwave-api.onrender.com)).
+2. **Plan B (Local Execution)**: Single-click execution via `start_demo.bat` / `start_demo.sh` (works 100% offline).
+3. **Plan C (Emergency Video)**: 2-minute pre-recorded video walkthrough ([`docs/VIDEO_SHOTLIST.md`](docs/VIDEO_SHOTLIST.md)).
 
 ---
 
