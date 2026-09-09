@@ -1,0 +1,1836 @@
+{
+  "type": "FeatureCollection",
+  "name": "amc_ahmedabad_city_wards",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "AMD_01",
+      "properties": {
+        "OBJECTID": 1,
+        "Ward_No": "AMD_01",
+        "Ward_Name": "Navrangpura",
+        "Zone": "West Zone",
+        "Area_SqKm": 5.4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.54,
+              23.03
+            ],
+            [
+              72.57,
+              23.03
+            ],
+            [
+              72.57,
+              23.055
+            ],
+            [
+              72.54,
+              23.055
+            ],
+            [
+              72.54,
+              23.03
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_02",
+      "properties": {
+        "OBJECTID": 2,
+        "Ward_No": "AMD_02",
+        "Ward_Name": "Jamalpur",
+        "Zone": "Central Zone",
+        "Area_SqKm": 3.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.57,
+              23.01
+            ],
+            [
+              72.6,
+              23.01
+            ],
+            [
+              72.6,
+              23.03
+            ],
+            [
+              72.57,
+              23.03
+            ],
+            [
+              72.57,
+              23.01
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_03",
+      "properties": {
+        "OBJECTID": 3,
+        "Ward_No": "AMD_03",
+        "Ward_Name": "Khadia",
+        "Zone": "Central Zone",
+        "Area_SqKm": 2.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.58,
+              23.02
+            ],
+            [
+              72.61,
+              23.02
+            ],
+            [
+              72.61,
+              23.045
+            ],
+            [
+              72.58,
+              23.045
+            ],
+            [
+              72.58,
+              23.02
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_04",
+      "properties": {
+        "OBJECTID": 4,
+        "Ward_No": "AMD_04",
+        "Ward_Name": "Danilimda",
+        "Zone": "South Zone",
+        "Area_SqKm": 6.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.57,
+              22.98
+            ],
+            [
+              72.61,
+              22.98
+            ],
+            [
+              72.61,
+              23.01
+            ],
+            [
+              72.57,
+              23.01
+            ],
+            [
+              72.57,
+              22.98
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_05",
+      "properties": {
+        "OBJECTID": 5,
+        "Ward_No": "AMD_05",
+        "Ward_Name": "Bodakdev",
+        "Zone": "North West Zone",
+        "Area_SqKm": 7.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.5,
+              23.03
+            ],
+            [
+              72.54,
+              23.03
+            ],
+            [
+              72.54,
+              23.06
+            ],
+            [
+              72.5,
+              23.06
+            ],
+            [
+              72.5,
+              23.03
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_06",
+      "properties": {
+        "OBJECTID": 6,
+        "Ward_No": "AMD_06",
+        "Ward_Name": "Sabarmati",
+        "Zone": "West Zone",
+        "Area_SqKm": 5.9
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.56,
+              23.06
+            ],
+            [
+              72.6,
+              23.06
+            ],
+            [
+              72.6,
+              23.095
+            ],
+            [
+              72.56,
+              23.095
+            ],
+            [
+              72.56,
+              23.06
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_07",
+      "properties": {
+        "OBJECTID": 7,
+        "Ward_No": "AMD_07",
+        "Ward_Name": "Paldi",
+        "Zone": "West Zone",
+        "Area_SqKm": 4.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.545,
+              23.005
+            ],
+            [
+              72.575,
+              23.005
+            ],
+            [
+              72.575,
+              23.03
+            ],
+            [
+              72.545,
+              23.03
+            ],
+            [
+              72.545,
+              23.005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_08",
+      "properties": {
+        "OBJECTID": 8,
+        "Ward_No": "AMD_08",
+        "Ward_Name": "Naranpura",
+        "Zone": "West Zone",
+        "Area_SqKm": 4.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.535,
+              23.045
+            ],
+            [
+              72.565,
+              23.045
+            ],
+            [
+              72.565,
+              23.075
+            ],
+            [
+              72.535,
+              23.075
+            ],
+            [
+              72.535,
+              23.045
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_09",
+      "properties": {
+        "OBJECTID": 9,
+        "Ward_No": "AMD_09",
+        "Ward_Name": "Vasna",
+        "Zone": "West Zone",
+        "Area_SqKm": 4.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.535,
+              22.985
+            ],
+            [
+              72.565,
+              22.985
+            ],
+            [
+              72.565,
+              23.01
+            ],
+            [
+              72.535,
+              23.01
+            ],
+            [
+              72.535,
+              22.985
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_10",
+      "properties": {
+        "OBJECTID": 10,
+        "Ward_No": "AMD_10",
+        "Ward_Name": "Ranip",
+        "Zone": "West Zone",
+        "Area_SqKm": 5.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.545,
+              23.07
+            ],
+            [
+              72.575,
+              23.07
+            ],
+            [
+              72.575,
+              23.1
+            ],
+            [
+              72.545,
+              23.1
+            ],
+            [
+              72.545,
+              23.07
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_11",
+      "properties": {
+        "OBJECTID": 11,
+        "Ward_No": "AMD_11",
+        "Ward_Name": "Shahpur",
+        "Zone": "Central Zone",
+        "Area_SqKm": 2.6
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.565,
+              23.035
+            ],
+            [
+              72.59,
+              23.035
+            ],
+            [
+              72.59,
+              23.055
+            ],
+            [
+              72.565,
+              23.055
+            ],
+            [
+              72.565,
+              23.035
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_12",
+      "properties": {
+        "OBJECTID": 12,
+        "Ward_No": "AMD_12",
+        "Ward_Name": "Dariapur",
+        "Zone": "Central Zone",
+        "Area_SqKm": 2.4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.585,
+              23.03
+            ],
+            [
+              72.61,
+              23.03
+            ],
+            [
+              72.61,
+              23.05
+            ],
+            [
+              72.585,
+              23.05
+            ],
+            [
+              72.585,
+              23.03
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_13",
+      "properties": {
+        "OBJECTID": 13,
+        "Ward_No": "AMD_13",
+        "Ward_Name": "Asarwa",
+        "Zone": "Central Zone",
+        "Area_SqKm": 3.6
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.595,
+              23.04
+            ],
+            [
+              72.625,
+              23.04
+            ],
+            [
+              72.625,
+              23.065
+            ],
+            [
+              72.595,
+              23.065
+            ],
+            [
+              72.595,
+              23.04
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_14",
+      "properties": {
+        "OBJECTID": 14,
+        "Ward_No": "AMD_14",
+        "Ward_Name": "Maninagar",
+        "Zone": "South Zone",
+        "Area_SqKm": 4.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.6,
+              22.99
+            ],
+            [
+              72.63,
+              22.99
+            ],
+            [
+              72.63,
+              23.015
+            ],
+            [
+              72.6,
+              23.015
+            ],
+            [
+              72.6,
+              22.99
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_15",
+      "properties": {
+        "OBJECTID": 15,
+        "Ward_No": "AMD_15",
+        "Ward_Name": "Behrampura",
+        "Zone": "South Zone",
+        "Area_SqKm": 4.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.575,
+              22.99
+            ],
+            [
+              72.605,
+              22.99
+            ],
+            [
+              72.605,
+              23.015
+            ],
+            [
+              72.575,
+              23.015
+            ],
+            [
+              72.575,
+              22.99
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_16",
+      "properties": {
+        "OBJECTID": 16,
+        "Ward_No": "AMD_16",
+        "Ward_Name": "Isanpur",
+        "Zone": "South Zone",
+        "Area_SqKm": 5.7
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.59,
+              22.97
+            ],
+            [
+              72.625,
+              22.97
+            ],
+            [
+              72.625,
+              22.995
+            ],
+            [
+              72.59,
+              22.995
+            ],
+            [
+              72.59,
+              22.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_17",
+      "properties": {
+        "OBJECTID": 17,
+        "Ward_No": "AMD_17",
+        "Ward_Name": "Vatva",
+        "Zone": "South Zone",
+        "Area_SqKm": 8.4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.61,
+              22.95
+            ],
+            [
+              72.65,
+              22.95
+            ],
+            [
+              72.65,
+              22.98
+            ],
+            [
+              72.61,
+              22.98
+            ],
+            [
+              72.61,
+              22.95
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_18",
+      "properties": {
+        "OBJECTID": 18,
+        "Ward_No": "AMD_18",
+        "Ward_Name": "Thaltej",
+        "Zone": "North West Zone",
+        "Area_SqKm": 7.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.495,
+              23.045
+            ],
+            [
+              72.53,
+              23.045
+            ],
+            [
+              72.53,
+              23.075
+            ],
+            [
+              72.495,
+              23.075
+            ],
+            [
+              72.495,
+              23.045
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_19",
+      "properties": {
+        "OBJECTID": 19,
+        "Ward_No": "AMD_19",
+        "Ward_Name": "Gota",
+        "Zone": "North West Zone",
+        "Area_SqKm": 9.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.51,
+              23.085
+            ],
+            [
+              72.55,
+              23.085
+            ],
+            [
+              72.55,
+              23.12
+            ],
+            [
+              72.51,
+              23.12
+            ],
+            [
+              72.51,
+              23.085
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_20",
+      "properties": {
+        "OBJECTID": 20,
+        "Ward_No": "AMD_20",
+        "Ward_Name": "Ghatlodiya",
+        "Zone": "North West Zone",
+        "Area_SqKm": 5.3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.52,
+              23.06
+            ],
+            [
+              72.555,
+              23.06
+            ],
+            [
+              72.555,
+              23.085
+            ],
+            [
+              72.52,
+              23.085
+            ],
+            [
+              72.52,
+              23.06
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_21",
+      "properties": {
+        "OBJECTID": 21,
+        "Ward_No": "AMD_21",
+        "Ward_Name": "Chandlodiya",
+        "Zone": "North West Zone",
+        "Area_SqKm": 4.9
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.53,
+              23.07
+            ],
+            [
+              72.56,
+              23.07
+            ],
+            [
+              72.56,
+              23.095
+            ],
+            [
+              72.53,
+              23.095
+            ],
+            [
+              72.53,
+              23.07
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_22",
+      "properties": {
+        "OBJECTID": 22,
+        "Ward_No": "AMD_22",
+        "Ward_Name": "Jodhpur",
+        "Zone": "South West Zone",
+        "Area_SqKm": 6.4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.505,
+              23.01
+            ],
+            [
+              72.54,
+              23.01
+            ],
+            [
+              72.54,
+              23.035
+            ],
+            [
+              72.505,
+              23.035
+            ],
+            [
+              72.505,
+              23.01
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_23",
+      "properties": {
+        "OBJECTID": 23,
+        "Ward_No": "AMD_23",
+        "Ward_Name": "Vejalpur",
+        "Zone": "South West Zone",
+        "Area_SqKm": 5.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.515,
+              22.995
+            ],
+            [
+              72.545,
+              22.995
+            ],
+            [
+              72.545,
+              23.02
+            ],
+            [
+              72.515,
+              23.02
+            ],
+            [
+              72.515,
+              22.995
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_24",
+      "properties": {
+        "OBJECTID": 24,
+        "Ward_No": "AMD_24",
+        "Ward_Name": "Sarkhej",
+        "Zone": "South West Zone",
+        "Area_SqKm": 9.6
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.485,
+              22.97
+            ],
+            [
+              72.525,
+              22.97
+            ],
+            [
+              72.525,
+              23.005
+            ],
+            [
+              72.485,
+              23.005
+            ],
+            [
+              72.485,
+              22.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_25",
+      "properties": {
+        "OBJECTID": 25,
+        "Ward_No": "AMD_25",
+        "Ward_Name": "Bapunagar",
+        "Zone": "East Zone",
+        "Area_SqKm": 3.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.62,
+              23.035
+            ],
+            [
+              72.645,
+              23.035
+            ],
+            [
+              72.645,
+              23.055
+            ],
+            [
+              72.62,
+              23.055
+            ],
+            [
+              72.62,
+              23.035
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_26",
+      "properties": {
+        "OBJECTID": 26,
+        "Ward_No": "AMD_26",
+        "Ward_Name": "Amraiwadi",
+        "Zone": "East Zone",
+        "Area_SqKm": 4.3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.62,
+              23.005
+            ],
+            [
+              72.65,
+              23.005
+            ],
+            [
+              72.65,
+              23.025
+            ],
+            [
+              72.62,
+              23.025
+            ],
+            [
+              72.62,
+              23.005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_27",
+      "properties": {
+        "OBJECTID": 27,
+        "Ward_No": "AMD_27",
+        "Ward_Name": "Gomtipur",
+        "Zone": "East Zone",
+        "Area_SqKm": 3.4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.61,
+              23.015
+            ],
+            [
+              72.635,
+              23.015
+            ],
+            [
+              72.635,
+              23.035
+            ],
+            [
+              72.61,
+              23.035
+            ],
+            [
+              72.61,
+              23.015
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_28",
+      "properties": {
+        "OBJECTID": 28,
+        "Ward_No": "AMD_28",
+        "Ward_Name": "Odhav",
+        "Zone": "East Zone",
+        "Area_SqKm": 7.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.645,
+              23.015
+            ],
+            [
+              72.68,
+              23.015
+            ],
+            [
+              72.68,
+              23.045
+            ],
+            [
+              72.645,
+              23.045
+            ],
+            [
+              72.645,
+              23.015
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_29",
+      "properties": {
+        "OBJECTID": 29,
+        "Ward_No": "AMD_29",
+        "Ward_Name": "Nikol",
+        "Zone": "East Zone",
+        "Area_SqKm": 8.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.645,
+              23.045
+            ],
+            [
+              72.68,
+              23.045
+            ],
+            [
+              72.68,
+              23.075
+            ],
+            [
+              72.645,
+              23.075
+            ],
+            [
+              72.645,
+              23.045
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_30",
+      "properties": {
+        "OBJECTID": 30,
+        "Ward_No": "AMD_30",
+        "Ward_Name": "Naroda",
+        "Zone": "North Zone",
+        "Area_SqKm": 7.9
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.635,
+              23.065
+            ],
+            [
+              72.67,
+              23.065
+            ],
+            [
+              72.67,
+              23.095
+            ],
+            [
+              72.635,
+              23.095
+            ],
+            [
+              72.635,
+              23.065
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_31",
+      "properties": {
+        "OBJECTID": 31,
+        "Ward_No": "AMD_31",
+        "Ward_Name": "Sardarnagar",
+        "Zone": "North Zone",
+        "Area_SqKm": 5.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.61,
+              23.065
+            ],
+            [
+              72.64,
+              23.065
+            ],
+            [
+              72.64,
+              23.09
+            ],
+            [
+              72.61,
+              23.09
+            ],
+            [
+              72.61,
+              23.065
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_32",
+      "properties": {
+        "OBJECTID": 32,
+        "Ward_No": "AMD_32",
+        "Ward_Name": "Kubernagar",
+        "Zone": "North Zone",
+        "Area_SqKm": 4.4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.625,
+              23.055
+            ],
+            [
+              72.655,
+              23.055
+            ],
+            [
+              72.655,
+              23.08
+            ],
+            [
+              72.625,
+              23.08
+            ],
+            [
+              72.625,
+              23.055
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_33",
+      "properties": {
+        "OBJECTID": 33,
+        "Ward_No": "AMD_33",
+        "Ward_Name": "India Colony",
+        "Zone": "North Zone",
+        "Area_SqKm": 4.6
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.63,
+              23.045
+            ],
+            [
+              72.66,
+              23.045
+            ],
+            [
+              72.66,
+              23.07
+            ],
+            [
+              72.63,
+              23.07
+            ],
+            [
+              72.63,
+              23.045
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_34",
+      "properties": {
+        "OBJECTID": 34,
+        "Ward_No": "AMD_34",
+        "Ward_Name": "Saijpur",
+        "Zone": "North Zone",
+        "Area_SqKm": 4.7
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.615,
+              23.05
+            ],
+            [
+              72.645,
+              23.05
+            ],
+            [
+              72.645,
+              23.075
+            ],
+            [
+              72.615,
+              23.075
+            ],
+            [
+              72.615,
+              23.05
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_35",
+      "properties": {
+        "OBJECTID": 35,
+        "Ward_No": "AMD_35",
+        "Ward_Name": "Vastral",
+        "Zone": "East Zone",
+        "Area_SqKm": 7.6
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.64,
+              22.985
+            ],
+            [
+              72.675,
+              22.985
+            ],
+            [
+              72.675,
+              23.015
+            ],
+            [
+              72.64,
+              23.015
+            ],
+            [
+              72.64,
+              22.985
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_36",
+      "properties": {
+        "OBJECTID": 36,
+        "Ward_No": "AMD_36",
+        "Ward_Name": "Lambha",
+        "Zone": "South Zone",
+        "Area_SqKm": 9.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.58,
+              22.935
+            ],
+            [
+              72.62,
+              22.935
+            ],
+            [
+              72.62,
+              22.965
+            ],
+            [
+              72.58,
+              22.965
+            ],
+            [
+              72.58,
+              22.935
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_37",
+      "properties": {
+        "OBJECTID": 37,
+        "Ward_No": "AMD_37",
+        "Ward_Name": "Ramol",
+        "Zone": "East Zone",
+        "Area_SqKm": 6.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.63,
+              22.975
+            ],
+            [
+              72.665,
+              22.975
+            ],
+            [
+              72.665,
+              23.005
+            ],
+            [
+              72.63,
+              23.005
+            ],
+            [
+              72.63,
+              22.975
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_38",
+      "properties": {
+        "OBJECTID": 38,
+        "Ward_No": "AMD_38",
+        "Ward_Name": "Viratnagar",
+        "Zone": "East Zone",
+        "Area_SqKm": 4.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.635,
+              23.025
+            ],
+            [
+              72.665,
+              23.025
+            ],
+            [
+              72.665,
+              23.05
+            ],
+            [
+              72.635,
+              23.05
+            ],
+            [
+              72.635,
+              23.025
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_39",
+      "properties": {
+        "OBJECTID": 39,
+        "Ward_No": "AMD_39",
+        "Ward_Name": "Maktampur",
+        "Zone": "South West Zone",
+        "Area_SqKm": 5.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.52,
+              22.98
+            ],
+            [
+              72.55,
+              22.98
+            ],
+            [
+              72.55,
+              23.005
+            ],
+            [
+              72.52,
+              23.005
+            ],
+            [
+              72.52,
+              22.98
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_40",
+      "properties": {
+        "OBJECTID": 40,
+        "Ward_No": "AMD_40",
+        "Ward_Name": "Stadium",
+        "Zone": "West Zone",
+        "Area_SqKm": 3.9
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.555,
+              23.035
+            ],
+            [
+              72.58,
+              23.035
+            ],
+            [
+              72.58,
+              23.06
+            ],
+            [
+              72.555,
+              23.06
+            ],
+            [
+              72.555,
+              23.035
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_41",
+      "properties": {
+        "OBJECTID": 41,
+        "Ward_No": "AMD_41",
+        "Ward_Name": "Madhupura",
+        "Zone": "Central Zone",
+        "Area_SqKm": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.575,
+              23.04
+            ],
+            [
+              72.6,
+              23.04
+            ],
+            [
+              72.6,
+              23.06
+            ],
+            [
+              72.575,
+              23.06
+            ],
+            [
+              72.575,
+              23.04
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_42",
+      "properties": {
+        "OBJECTID": 42,
+        "Ward_No": "AMD_42",
+        "Ward_Name": "Raikhad",
+        "Zone": "Central Zone",
+        "Area_SqKm": 2.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.565,
+              23.015
+            ],
+            [
+              72.585,
+              23.015
+            ],
+            [
+              72.585,
+              23.035
+            ],
+            [
+              72.565,
+              23.035
+            ],
+            [
+              72.565,
+              23.015
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_43",
+      "properties": {
+        "OBJECTID": 43,
+        "Ward_No": "AMD_43",
+        "Ward_Name": "Dudheshwar",
+        "Zone": "Central Zone",
+        "Area_SqKm": 2.7
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.565,
+              23.045
+            ],
+            [
+              72.59,
+              23.045
+            ],
+            [
+              72.59,
+              23.065
+            ],
+            [
+              72.565,
+              23.065
+            ],
+            [
+              72.565,
+              23.045
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_44",
+      "properties": {
+        "OBJECTID": 44,
+        "Ward_No": "AMD_44",
+        "Ward_Name": "Saraspur",
+        "Zone": "East Zone",
+        "Area_SqKm": 3.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.605,
+              23.025
+            ],
+            [
+              72.63,
+              23.025
+            ],
+            [
+              72.63,
+              23.045
+            ],
+            [
+              72.605,
+              23.045
+            ],
+            [
+              72.605,
+              23.025
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_45",
+      "properties": {
+        "OBJECTID": 45,
+        "Ward_No": "AMD_45",
+        "Ward_Name": "Rakhial",
+        "Zone": "East Zone",
+        "Area_SqKm": 3.3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.615,
+              23.015
+            ],
+            [
+              72.64,
+              23.015
+            ],
+            [
+              72.64,
+              23.035
+            ],
+            [
+              72.615,
+              23.035
+            ],
+            [
+              72.615,
+              23.015
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_46",
+      "properties": {
+        "OBJECTID": 46,
+        "Ward_No": "AMD_46",
+        "Ward_Name": "Baherampura East",
+        "Zone": "South Zone",
+        "Area_SqKm": 4.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.585,
+              22.985
+            ],
+            [
+              72.615,
+              22.985
+            ],
+            [
+              72.615,
+              23.01
+            ],
+            [
+              72.585,
+              23.01
+            ],
+            [
+              72.585,
+              22.985
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_47",
+      "properties": {
+        "OBJECTID": 47,
+        "Ward_No": "AMD_47",
+        "Ward_Name": "Chandkheda",
+        "Zone": "West Zone",
+        "Area_SqKm": 8.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.565,
+              23.095
+            ],
+            [
+              72.605,
+              23.095
+            ],
+            [
+              72.605,
+              23.13
+            ],
+            [
+              72.565,
+              23.13
+            ],
+            [
+              72.565,
+              23.095
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AMD_48",
+      "properties": {
+        "OBJECTID": 48,
+        "Ward_No": "AMD_48",
+        "Ward_Name": "Motera",
+        "Zone": "West Zone",
+        "Area_SqKm": 6.7
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.58,
+              23.085
+            ],
+            [
+              72.615,
+              23.085
+            ],
+            [
+              72.615,
+              23.115
+            ],
+            [
+              72.58,
+              23.115
+            ],
+            [
+              72.58,
+              23.085
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

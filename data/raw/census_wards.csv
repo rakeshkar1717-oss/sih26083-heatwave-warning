@@ -1,0 +1,49 @@
+Ward_No,Ward_Name,Zone,Total_Population,Elderly_Pop_Pct,Outdoor_Workers_Pct,Slum_Households_Pct,Tree_Cover_Pct,Hospital_Beds_Per_1000
+AMD_01,Navrangpura,West Zone,124500,14.5,18.2,5.1,22.4,4.2
+AMD_02,Jamalpur,Central Zone,142800,11.2,46.8,38.5,4.2,0.9
+AMD_03,Khadia,Central Zone,98400,18.9,32.4,21.0,3.1,1.5
+AMD_04,Danilimda,South Zone,186300,9.4,54.1,58.7,2.8,0.6
+AMD_05,Bodakdev,North West Zone,115200,12.0,14.5,2.3,28.6,5.8
+AMD_06,Sabarmati,West Zone,138600,13.2,28.4,16.2,14.5,2.1
+AMD_07,Paldi,West Zone,108900,15.8,16.4,4.8,20.1,3.8
+AMD_08,Naranpura,West Zone,132400,16.2,19.1,6.5,18.7,3.1
+AMD_09,Vasna,West Zone,121000,13.5,24.6,18.2,12.4,1.8
+AMD_10,Ranip,West Zone,145200,11.8,29.5,22.4,11.2,1.6
+AMD_11,Shahpur,Central Zone,112300,12.8,42.1,34.2,4.8,1.2
+AMD_12,Dariapur,Central Zone,126700,13.1,44.5,36.8,3.9,1.1
+AMD_13,Asarwa,Central Zone,118400,14.2,38.2,28.5,6.2,3.5
+AMD_14,Maninagar,South Zone,152100,15.1,22.8,12.4,16.8,2.9
+AMD_15,Behrampura,South Zone,168900,9.8,51.2,52.3,3.5,0.8
+AMD_16,Isanpur,South Zone,174300,10.2,45.8,41.2,5.1,1.0
+AMD_17,Vatva,South Zone,192500,8.7,56.8,61.4,2.5,0.5
+AMD_18,Thaltej,North West Zone,141200,11.4,15.2,3.1,26.4,4.9
+AMD_19,Gota,North West Zone,158400,9.9,22.1,8.4,19.2,2.2
+AMD_20,Ghatlodiya,North West Zone,166300,13.4,21.8,9.2,16.5,2.5
+AMD_21,Chandlodiya,North West Zone,139800,11.1,27.4,15.8,13.8,1.7
+AMD_22,Jodhpur,South West Zone,148600,13.8,16.1,4.2,23.5,3.6
+AMD_23,Vejalpur,South West Zone,155200,12.4,25.8,19.5,15.1,2.0
+AMD_24,Sarkhej,South West Zone,178900,9.5,48.2,46.1,6.8,0.9
+AMD_25,Bapunagar,East Zone,162400,12.6,41.2,32.8,5.4,1.4
+AMD_26,Amraiwadi,East Zone,171800,10.8,47.9,44.2,4.1,1.0
+AMD_27,Gomtipur,East Zone,159200,11.5,49.2,48.6,3.8,0.9
+AMD_28,Odhav,East Zone,184600,9.1,53.4,55.2,3.2,0.7
+AMD_29,Nikol,East Zone,169400,10.4,31.2,18.4,12.1,1.9
+AMD_30,Naroda,North Zone,176500,11.2,36.8,24.1,9.8,1.6
+AMD_31,Sardarnagar,North Zone,134200,13.6,34.5,22.8,8.5,1.4
+AMD_32,Kubernagar,North Zone,142900,12.1,39.4,29.5,7.2,1.1
+AMD_33,India Colony,North Zone,151800,12.9,33.1,20.4,10.4,1.8
+AMD_34,Saijpur,North Zone,146700,11.7,37.6,26.8,8.1,1.3
+AMD_35,Vastral,East Zone,188200,9.2,42.5,31.4,7.5,1.2
+AMD_36,Lambha,South Zone,161400,8.9,55.2,57.9,3.0,0.6
+AMD_37,Ramol,East Zone,154700,9.8,46.3,39.8,5.8,1.0
+AMD_38,Viratnagar,East Zone,149800,11.3,43.7,35.1,6.1,1.2
+AMD_39,Maktampur,South West Zone,136500,10.6,38.9,28.4,8.9,1.4
+AMD_40,Stadium,West Zone,114800,16.5,17.8,5.8,21.5,4.0
+AMD_41,Madhupura,Central Zone,95200,14.8,39.2,26.4,5.5,1.8
+AMD_42,Raikhad,Central Zone,104100,13.9,41.8,31.2,4.9,1.5
+AMD_43,Dudheshwar,Central Zone,116700,12.5,43.9,37.5,4.2,1.1
+AMD_44,Saraspur,East Zone,129400,13.2,44.1,36.2,5.0,1.3
+AMD_45,Rakhial,East Zone,138200,11.9,47.3,42.8,4.5,1.0
+AMD_46,Baherampura East,South Zone,144800,10.1,50.8,49.5,3.6,0.8
+AMD_47,Chandkheda,West Zone,152900,12.2,21.4,11.5,17.4,2.4
+AMD_48,Motera,West Zone,141600,11.9,19.8,8.9,20.2,3.2

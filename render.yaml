@@ -1,0 +1,30 @@
+﻿services:
+  - type: web
+    name: sih-heatwave-api
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt && python -m backend.db.seed
+    startCommand: uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DEFAULT_CITY
+        value: Ahmedabad
+      - key: DEFAULT_LAT
+        value: "23.03"
+      - key: DEFAULT_LON
+        value: "72.58"
+      - key: USE_SYNTHETIC_DATA
+        value: "false"
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: GUPSHUP_API_KEY
+        sync: false
+      - key: CDS_API_KEY
+        sync: false

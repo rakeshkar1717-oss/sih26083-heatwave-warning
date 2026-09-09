@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: sih26083_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:////app/data/processed/heatwave_sih.db
+      - DEFAULT_CITY=Ahmedabad
+      - DEFAULT_LAT=23.03
+      - DEFAULT_LON=72.58
+      - USE_SYNTHETIC_DATA=false
+    volumes:
+      - ./data:/app/data
+      - ./docs:/app/docs
+    command: >
+      sh -c "python -m backend.db.seed && uvicorn backend.api.main:app --host 0.0.0.0 --port 8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    container_name: sih26083_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
