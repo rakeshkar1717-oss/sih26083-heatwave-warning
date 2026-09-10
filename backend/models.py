@@ -186,6 +186,57 @@ class VulnerabilityMetrics(BaseModel):
     hvi_score: float = Field(..., ge=0.0, le=1.0, description="Composite Heat Vulnerability Index (0.0=lowest, 1.0=highest)")
 
 
+class WardVulnerability(BaseModel):
+    """Socio-demographic vulnerability indicators and absolute population counts per ward."""
+
+    ward_id: str = Field(..., description="Unique municipal ward code e.g. AMD_01")
+    ward_name: str = Field(..., description="Municipal ward name")
+    elderly_pct: float = Field(..., ge=0.0, le=100.0, description="Percentage of population aged 60+")
+    outdoor_worker_pct: float = Field(..., ge=0.0, le=100.0, description="Percentage engaged in outdoor informal labor")
+    slum_pct: float = Field(..., ge=0.0, le=100.0, description="Percentage living in informal/slum settlements")
+    green_cover_pct: float = Field(..., ge=0.0, le=100.0, description="Urban green canopy / vegetative cover %")
+    hospital_bed_density: float = Field(..., ge=0.0, description="Hospital beds per 1,000 residents")
+
+    # Absolute population counts per demographic segment (additive fields)
+    total_population: int = Field(default=100000, ge=0, description="Total resident population")
+    count_age_0_5: int = Field(default=0, ge=0, description="Children aged 0-5 years")
+    count_age_6_17: int = Field(default=0, ge=0, description="School-age children/youth aged 6-17 years")
+    count_age_18_59: int = Field(default=0, ge=0, description="Working-age adults aged 18-59 years")
+    count_age_60_plus: int = Field(default=0, ge=0, description="Senior citizens aged 60+ years")
+    count_outdoor_labor: int = Field(default=0, ge=0, description="Informal/outdoor manual laborers")
+    count_indoor_labor: int = Field(default=0, ge=0, description="Indoor/formal sector workers")
+    count_slum_residents: int = Field(default=0, ge=0, description="Residents living in informal/slum dwellings")
+
+    # Optional HVI scores
+    vulnerability_score: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Calculated HVI score")
+    risk_tier: Optional[str] = Field(default=None, description="HVI tier: Low, Medium, High, Extreme")
+
+
+class PopulationSegmentImpact(BaseModel):
+    """Impact assessment for a specific population demographic cohort."""
+
+    segment_id: str = Field(..., description="Machine identifier e.g. children_under_5")
+    name: str = Field(..., description="Human-readable segment title")
+    estimated_count: int = Field(..., ge=0, description="Estimated absolute population count")
+    percentage: float = Field(..., ge=0.0, le=100.0, description="Percentage of total ward population")
+    consequence: str = Field(..., description="Specific epidemiological/physiological consequence text")
+    severity: str = Field(..., description="Health risk severity level: LOW, MODERATE, HIGH, CRITICAL")
+
+
+class PopulationImpactResponse(BaseModel):
+    """Population-segmented health consequence response for a specific municipal ward."""
+
+    ward_id: str = Field(..., description="Ward identifier")
+    ward_name: str = Field(..., description="Ward name")
+    total_population: int = Field(..., ge=0, description="Total ward resident population")
+    risk_level: RiskLevel = Field(..., description="Current heatwave risk tier of the ward")
+    final_risk_score: float = Field(..., ge=0.0, le=1.0, description="Composite risk score (0.0 to 1.0)")
+    segments: Dict[str, PopulationSegmentImpact] = Field(..., description="Breakdown by demographic group")
+    total_vulnerable_count: int = Field(..., ge=0, description="Combined count of severely vulnerable residents")
+    summary: str = Field(..., description="Actionable civic summary of population-level impacts")
+
+
+
 # ==============================================================================
 # 4. Ward Risk Score & GIS Schemas (Day 4 & 5 Scope)
 # ==============================================================================

@@ -36,8 +36,10 @@ from backend.models import (
     AlertChannel,
     RiskLevel,
     WardRiskScore,
+    PopulationImpactResponse,
 )
 from backend.alerts.alert_engine import send_ward_alert
+from backend.vulnerability_model.health_consequence_map import build_population_impact_breakdown
 
 logger = logging.getLogger(__name__)
 
@@ -150,6 +152,7 @@ def root() -> Dict[str, Any]:
             "/api/wards/geojson",
             "/api/india/geojson",
             "/api/risk/{ward_id}",
+            "/api/population-impact/{ward_id}",
             "/api/weather/{ward_id}",
             "/api/forecast/{ward_id}",
             "/api/alert/trigger",
@@ -239,6 +242,12 @@ def get_wards_geojson(db: Session = Depends(get_db)) -> Dict[str, Any]:
             "slum_pct": vuln.slum_pct if vuln else None,
             "green_cover_pct": vuln.green_cover_pct if vuln else None,
             "hospital_bed_density": vuln.hospital_bed_density if vuln else None,
+            # Absolute Population Impact Metrics
+            "total_population": vuln.total_population if vuln and vuln.total_population else 100000,
+            "count_age_0_5": vuln.count_age_0_5 if vuln and vuln.count_age_0_5 else int(round((vuln.total_population or 100000) * 0.092)),
+            "count_age_60_plus": vuln.count_age_60_plus if vuln and vuln.count_age_60_plus else int(round((vuln.total_population or 100000) * ((vuln.elderly_pct if vuln else 10.0) / 100.0))),
+            "count_outdoor_labor": vuln.count_outdoor_labor if vuln and vuln.count_outdoor_labor else int(round((vuln.total_population or 100000) * ((vuln.outdoor_worker_pct if vuln else 35.0) / 100.0))),
+            "count_slum_residents": vuln.count_slum_residents if vuln and vuln.count_slum_residents else int(round((vuln.total_population or 100000) * ((vuln.slum_pct if vuln else 20.0) / 100.0))),
             # Thermal / Weather
             "temp_c": latest_weather.temp_c if latest_weather else None,
             "humidity_pct": latest_weather.humidity_pct if latest_weather else None,
@@ -351,6 +360,52 @@ def get_ward_risk(ward_id: str, db: Session = Depends(get_db)) -> WardRiskScore:
         recommended_action=_get_advisory_text(risk_tier, ward.ward_name),
         forecasts=forecast_list,
     )
+
+
+@app.get("/api/population-impact/{ward_id}", response_model=PopulationImpactResponse)
+def get_population_impact(ward_id: str, db: Session = Depends(get_db)) -> PopulationImpactResponse:
+    """Retrieve population-segmented health consequence impact for a specific ward.
+
+    Differentiates generic weather alerts by showing WHO specifically is affected
+    and HOW, with real estimated population counts based on WHO & Ahmedabad HAP findings.
+    """
+    ward = db.query(WardBoundary).filter(WardBoundary.ward_id == ward_id).first()
+    if not ward:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Ward '{ward_id}' not found in database.",
+        )
+
+    vuln = ward.vulnerability
+    latest_weather = (
+        db.query(WeatherReading)
+        .filter(WeatherReading.ward_id == ward.ward_id)
+        .order_by(desc(WeatherReading.timestamp))
+        .first()
+    )
+
+    hazard_score = (latest_weather.thermal_stress_score / 100.0) if latest_weather else 0.65
+    vuln_score = vuln.vulnerability_score if vuln else 0.50
+    final_risk = round(0.60 * hazard_score + 0.40 * vuln_score, 4)
+    risk_tier = _compute_risk_level(final_risk)
+
+    total_pop = int(vuln.total_population) if vuln and vuln.total_population else 100000
+    elderly_pct = float(vuln.elderly_pct) if vuln else 10.0
+    outdoor_pct = float(vuln.outdoor_worker_pct) if vuln else 35.0
+    slum_pct = float(vuln.slum_pct) if vuln else 20.0
+
+    breakdown = build_population_impact_breakdown(
+        ward_id=ward.ward_id,
+        ward_name=ward.ward_name,
+        total_population=total_pop,
+        elderly_pct=elderly_pct,
+        outdoor_worker_pct=outdoor_pct,
+        slum_pct=slum_pct,
+        risk_level=risk_tier,
+        final_risk_score=final_risk,
+    )
+
+    return PopulationImpactResponse(**breakdown)
 
 
 @app.get("/api/weather/{ward_id}")

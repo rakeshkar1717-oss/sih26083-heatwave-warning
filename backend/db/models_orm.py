@@ -89,6 +89,17 @@ class WardVulnerability(Base):
     vulnerability_score: Mapped[float] = mapped_column(Float, nullable=False)
     risk_tier: Mapped[str] = mapped_column(String(50), nullable=False)
     sub_indices_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Absolute population counts
+    total_population: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=100000)
+    count_age_0_5: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    count_age_6_17: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    count_age_18_59: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    count_age_60_plus: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    count_outdoor_labor: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    count_indoor_labor: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    count_slum_residents: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships

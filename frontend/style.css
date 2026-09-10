@@ -350,6 +350,188 @@ header {
   transition: width 0.4s ease;
 }
 
+/* Population Impact Breakdown Panel ("Who is Affected") */
+.impact-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.impact-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.impact-panel-header h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-orange);
+  margin-bottom: 0;
+}
+
+.impact-total-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #1e293b;
+  color: #38bdf8;
+  border: 1px solid #334155;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
+.impact-summary-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  background: rgba(15, 23, 42, 0.6);
+  border-left: 3px solid var(--accent-orange);
+  padding: 6px 10px;
+  border-radius: 0 4px 4px 0;
+}
+
+.cohort-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cohort-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid #273553;
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 4px solid var(--color-moderate);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.cohort-card:hover {
+  transform: translateX(2px);
+  border-color: #3b82f6;
+}
+
+.cohort-card.tier-low {
+  border-left-color: var(--color-low);
+}
+
+.cohort-card.tier-moderate {
+  border-left-color: var(--color-moderate);
+}
+
+.cohort-card.tier-high {
+  border-left-color: var(--color-high);
+}
+
+.cohort-card.tier-very-high {
+  border-left-color: var(--color-very-high);
+}
+
+.cohort-card.tier-extreme {
+  border-left-color: var(--color-extreme);
+}
+
+.cohort-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cohort-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cohort-icon {
+  font-size: 1.05rem;
+}
+
+.cohort-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.cohort-count-badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  background: #1e293b;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #334155;
+}
+
+.cohort-count-badge span.pct-sub {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.68rem;
+  margin-left: 3px;
+}
+
+.cohort-consequence {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.cohort-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(51, 65, 85, 0.5);
+}
+
+.cohort-citation {
+  font-size: 0.66rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.severity-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.severity-tag.sev-low {
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.35);
+}
+
+.severity-tag.sev-moderate {
+  background: rgba(241, 196, 15, 0.18);
+  color: #f1c40f;
+  border: 1px solid rgba(241, 196, 15, 0.35);
+}
+
+.severity-tag.sev-high {
+  background: rgba(230, 126, 34, 0.2);
+  color: #fb923c;
+  border: 1px solid rgba(230, 126, 34, 0.4);
+}
+
+.severity-tag.sev-critical {
+  background: rgba(231, 76, 60, 0.22);
+  color: #f87171;
+  border: 1px solid rgba(231, 76, 60, 0.45);
+}
+
 /* Forecast Chart Card */
 .chart-card {
   background: var(--card-bg);

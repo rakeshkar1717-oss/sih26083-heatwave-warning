@@ -120,3 +120,12 @@ export async function getIndiaGeoJSON() {
   const response = await fetch(`${BASE_URL}/api/india/geojson`);
   return handleResponse(response);
 }
+
+/**
+ * Retrieve population-segmented health consequence breakdown for a specific ward.
+ * GET /api/population-impact/{wardId}
+ */
+export async function getPopulationImpact(wardId) {
+  const response = await fetch(`${BASE_URL}/api/population-impact/${encodeURIComponent(wardId)}`);
+  return handleResponse(response);
+}

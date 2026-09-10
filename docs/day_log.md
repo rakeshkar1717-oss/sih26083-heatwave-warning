@@ -433,12 +433,64 @@ Day 6 will consume these REST endpoints directly from the browser:
   - `test_vulnerability_model.py`: 5 passed
 - Historical Backtesting Script (`backend/backtesting/validation_report.py`): Executed cleanly, generating validation markdown and 300 DPI multi-panel chart.
 
+
+---
+
+## Day 11: Population Impact Breakdown Panel ("Who is Affected") & Epidemiological Health Consequence Engine
+
+### What Was Built
+
+#### 1. Demographic Absolute Count Extraction (`backend/vulnerability_model/census_loader.py`)
+- Enhanced the Census demographic loader to resolve and extract **absolute headcounts** alongside percentage baselines for every ward:
+  - `total_population`: Municipal census baseline or alias resolution.
+  - `count_age_60_plus`: Senior citizens ($60+$) calculated as $\text{round}(\text{total\_pop} \times \frac{\text{elderly\_pct}}{100})$.
+  - `count_outdoor_labor`: Informal & outdoor workers calculated as $\text{round}(\text{total\_pop} \times \frac{\text{outdoor\_pct}}{100})$.
+  - `count_slum_residents`: Uninsulated slum dwelling population calculated as $\text{round}(\text{total\_pop} \times \frac{\text{slum\_pct}}{100})$.
+  - `count_age_0_5`: Infants & young children based on Census 2011 standard benchmark ($9.2\%$).
+  - `count_age_6_17`: School-age youth based on Census 2011 standard benchmark ($18.8\%$).
+  - `count_age_18_59`: Working-age adult population ($\text{Total} - \text{Children} - \text{Youth} - \text{Elderly}$).
+  - `count_indoor_labor`: Indoor workforce ($\text{Total Labor} - \text{Outdoor Labor}$).
+- Enforced strict demographic math: $\text{percentage} \times \text{total\_population} = \text{headcount}$.
+
+#### 2. Epidemiological Health Consequence Mapping (`backend/vulnerability_model/health_consequence_map.py`)
+- Created a peer-reviewed epidemiological lookup and evaluation engine mapping each demographic cohort to physiological and clinical consequences across 5 risk tiers (`LOW`, `MODERATE`, `HIGH`, `VERY_HIGH`, `EXTREME`):
+  - **Children (Age 0-5)**: Dehydration, electrolyte imbalance, miliaria rubra, pediatric hyperthermia, and emergency hospitalization protocols (*WHO 2021 Heat-Health Guidance; Azhar et al. 2014, PLOS ONE*).
+  - **Elderly (Age 60+)**: Baroreflex impairment, occult dehydration, orthostatic hypotension, acute myocardial infarction, ischemic cerebrovascular events, and non-exertional heatstroke (*WHO/WMO 2015 WMO-No. 1142; Ahmedabad Heat Action Plan 2018*).
+  - **Outdoor & Informal Workers**: Exertional heat exhaustion, rhabdomyolysis, severe sodium deficit, acute kidney injury (AKI), and mandatory midday labor cessation (*NDMA Guidelines; Ahmedabad HAP OSHA standard*).
+  - **Slum & Informal Housing Residents**: The nocturnal "indoor thermal trap" phenomenon in tin/asbestos dwellings where indoor temperatures exceed ambient air by 3°C–6°C, preventing nocturnal recovery (*Knowlton et al. 2014, EHP; NRDC Urban Heat Island Studies*).
+
+#### 3. Data Models, ORM Schema & Database Persistence
+- Extended `backend/models.py` with `WardVulnerability` demographic count fields, `PopulationSegmentImpact`, and `PopulationImpactResponse`.
+- Added nullable count columns to `WardVulnerability` ORM table in `backend/db/models_orm.py`.
+- Updated `backend/db/seed.py` to persist demographic counts into SQLite database on seed.
+
+#### 4. REST Microservice Endpoint (`backend/api/main.py`)
+- Added `GET /api/population-impact/{ward_id}`:
+  - Fetches ward vulnerability demographics and live hazard risk tier.
+  - Synthesizes absolute population headcounts, segment breakdown, severity tags, and authoritative epidemiological text.
+  - Returns structured `PopulationImpactResponse` with 404 error handling for non-existent wards.
+  - Added population counts to GeoJSON feature properties in `GET /api/wards/geojson`.
+
+#### 5. Interactive Dashboard UI (`frontend/`)
+- **API Client (`frontend/api.js`)**: Added `getPopulationImpact(wardId)`.
+- **Sidebar Drawer (`frontend/index.html`)**: Added `#population-impact-panel` below the HVI vulnerability factors.
+- **High-Contrast Styling (`frontend/style.css`)**: Styled `.impact-panel`, `.cohort-card`, `.cohort-count-badge`, `.cohort-consequence`, and severity tags (`.sev-low`, `.sev-moderate`, `.sev-high`, `.sev-critical`) with risk-tier border color coding.
+- **Client-Side Orchestration (`frontend/main.js`)**: Added `renderPopulationImpact(props)` which dynamically fetches ward data from the API and renders cohort cards (👶 Children, 👴 Seniors, 🔨 Outdoor Workers, 🏚️ Slum Dwellings) with client-side fallback when offline.
+
+#### 6. Verification & Automated Test Coverage
+- Created `backend/tests/test_population_impact.py` verifying:
+  - Mathematical consistency between percentages and population counts.
+  - Clinical consequence text progression across hazard tiers.
+  - Authoritative citations (WHO, WMO, Ahmedabad HAP, PLOS ONE, NRDC).
+  - `GET /api/population-impact/{ward_id}` 200 OK contract schema and 404 responses.
+- Full Pytest suite passed: **65 Passed, 0 Failed (100% Pass Rate)**.
+- Frontend production bundle compiled cleanly via `npm run build` (Vite v5.4.21).
+
 ---
 
 ### Official Project Build Status: 100% COMPLETE & SUBMISSION-READY
-All 10 days of core engineering, scientific modeling, GIS integration, database persistence, multi-day forecasting, multi-channel alerting, interactive Leaflet choropleth dashboard, historical backtesting, production hardening, cloud deployment recipes, and presentation deliverables are **fully implemented, tested, and verified**.
+All features, including the new Population Impact Breakdown Panel, are fully implemented, tested, and production-ready.
 
-The system is ready for live demonstration and final submission for **Smart India Hackathon Problem Statement SIH26083**.
 
 
 

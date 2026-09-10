@@ -88,6 +88,14 @@ CENSUS_COLUMN_ALIASES = {
     "slum_pct": ["slum_pct", "slum_population_pct", "slum_density_pct", "informal_settlement_pct", "slum_ratio", "slum_households_pct"],
     "green_cover_pct": ["green_cover_pct", "ndvi_green_cover", "tree_canopy_pct", "vegetation_pct", "green_pct", "tree_cover_pct"],
     "hospital_bed_density": ["hospital_bed_density", "hospital_beds_per_1000", "bed_density", "health_infra", "beds_per_1k"],
+    "total_population": ["total_population", "population", "tot_pop", "total_pop", "persons", "residents"],
+    "count_age_0_5": ["count_age_0_5", "pop_0_5", "children_under_5", "children_0_5", "age_0_5"],
+    "count_age_6_17": ["count_age_6_17", "pop_6_17", "youth_6_17", "school_age", "age_6_17"],
+    "count_age_18_59": ["count_age_18_59", "pop_18_59", "adults_18_59", "working_age", "age_18_59"],
+    "count_age_60_plus": ["count_age_60_plus", "pop_60_plus", "seniors_count", "elderly_count", "age_60_plus"],
+    "count_outdoor_labor": ["count_outdoor_labor", "outdoor_workers_count", "informal_labor_count", "outdoor_labor"],
+    "count_indoor_labor": ["count_indoor_labor", "indoor_workers_count", "formal_labor_count", "indoor_labor"],
+    "count_slum_residents": ["count_slum_residents", "slum_population_count", "informal_housing_count", "slum_residents"],
 }
 
 # Flexible Column Aliases for GeoJSON / Shapefile Boundaries (Day 4)
