@@ -669,3 +669,36 @@ def get_backtest_geojson(db: Session = Depends(get_db)) -> Dict[str, Any]:
         "total_wards": len(features),
         "features": features,
     }
+
+
+# ==============================================================================
+# Forecast Accuracy & Confusion Matrix Endpoint (Validation)
+# ==============================================================================
+
+_forecast_accuracy_cache: Optional[Dict[str, Any]] = None
+
+
+@app.get("/api/validation/forecast-accuracy")
+def get_forecast_accuracy_report() -> Dict[str, Any]:
+    """Retrieve empirical 72-hour forecast accuracy, confusion matrix, and tier metrics."""
+    global _forecast_accuracy_cache
+    if _forecast_accuracy_cache is None:
+        from backend.validation.forecast_accuracy import run_full_accuracy_pipeline
+        eval_results, _ = run_full_accuracy_pipeline(save_chart=True, use_cache=True)
+        cm_dict = {
+            str(row_tier): {str(col_tier): int(val) for col_tier, val in cols.items()}
+            for row_tier, cols in eval_results["confusion_matrix"].to_dict(orient="index").items()
+        }
+        _forecast_accuracy_cache = {
+            "total_evaluations": eval_results["total_evaluations"],
+            "correct_classifications": eval_results["correct_classifications"],
+            "overall_accuracy_pct": eval_results["overall_accuracy_pct"],
+            "within_1_tier_pct": eval_results["within_1_tier_pct"],
+            "confusion_matrix": cm_dict,
+            "tier_metrics": eval_results["tier_metrics"],
+            "bias": eval_results["bias"],
+            "continuous_errors": eval_results["continuous_errors"],
+            "chart_url": "/assets/forecast_accuracy_matrix.png",
+        }
+    return _forecast_accuracy_cache
+
