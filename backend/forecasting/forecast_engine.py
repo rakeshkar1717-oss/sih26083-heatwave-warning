@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from sqlalchemy.orm import Session
 
-from backend.config import settings
+from backend.config import settings, DEFAULT_RISK_TIER_THRESHOLDS
 from backend.data_ingestion.ingest import get_weather_data
 from backend.index_calculation.index_engine import compute_thermal_indices
 from backend.models import WeatherSource, RiskLevel, FIXED_WEATHER_COLUMNS
@@ -25,15 +25,21 @@ logger = logging.getLogger(__name__)
 _CITY_WEATHER_FORECAST_CACHE: Dict[Any, pd.DataFrame] = {}
 
 
-def _classify_risk_tier(score: float) -> str:
+def _classify_risk_tier(score: float, thresholds: Optional[Dict[str, float]] = None) -> str:
     """Classify 0.0 - 1.0 composite risk score into standard risk tier."""
-    if score < 0.25:
+    t = thresholds or getattr(settings, "risk_tier_thresholds", DEFAULT_RISK_TIER_THRESHOLDS)
+    low_th = t.get("LOW", 0.25)
+    mod_th = t.get("MODERATE", 0.50)
+    high_th = t.get("HIGH", 0.70)
+    vhigh_th = t.get("VERY_HIGH", 0.85)
+
+    if score < low_th:
         return RiskLevel.LOW.value
-    elif score < 0.50:
+    elif score < mod_th:
         return RiskLevel.MODERATE.value
-    elif score < 0.70:
+    elif score < high_th:
         return RiskLevel.HIGH.value
-    elif score < 0.85:
+    elif score < vhigh_th:
         return RiskLevel.VERY_HIGH.value
     else:
         return RiskLevel.EXTREME.value
@@ -87,6 +93,7 @@ def generate_forecast(
     lon: Optional[float] = None,
     vuln_score: Optional[float] = None,
     weather_df: Optional[pd.DataFrame] = None,
+    thresholds: Optional[Dict[str, float]] = None,
 ) -> List[Dict[str, Any]]:
     """Generate multi-day predictive risk projections for a municipal ward.
 
@@ -190,7 +197,7 @@ def generate_forecast(
 
         # Composite risk: 60% Thermal Hazard + 40% Demographic Vulnerability
         predicted_risk = round(0.60 * hazard_score + 0.40 * vuln_score, 4)
-        tier = _classify_risk_tier(predicted_risk)
+        tier = _classify_risk_tier(predicted_risk, thresholds=thresholds)
 
         forecast_datetime = datetime(
             target_date.year, target_date.month, target_date.day, 14, 0, 0, tzinfo=timezone.utc

@@ -33,6 +33,7 @@ class WeatherSource(str, Enum):
     OPEN_METEO = "open_meteo"
     NASA_POWER = "nasa_power"
     ERA5 = "era5"
+    FUSED_OM_NASA = "fused_om_nasa"
 
 
 class WeatherRecord(BaseModel):

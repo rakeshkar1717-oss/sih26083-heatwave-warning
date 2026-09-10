@@ -43,6 +43,8 @@ data/cache/*.csv
 data/cache/*.json
 !data/cache/historical_ahmedabad_may2010.csv
 !data/cache/era5_ahmedabad_summer_2020_2024.csv
+!data/cache/open_meteo_summer_2021_2024.csv
+!data/cache/fused_summer_2021_2024.csv
 
 # Frontend & Node
 node_modules/

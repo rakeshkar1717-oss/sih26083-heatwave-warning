@@ -79,6 +79,25 @@ VULNERABILITY_TIERS = {
     "Extreme": {"min": 0.75, "max": 1.00, "color": "#e74c3c"},
 }
 
+# Standard Integrated Risk Tier Thresholds (0.0 to 1.0 Composite Score)
+# Default baseline boundaries
+DEFAULT_RISK_TIER_THRESHOLDS: Dict[str, float] = {
+    "LOW": 0.25,
+    "MODERATE": 0.50,
+    "HIGH": 0.70,
+    "VERY_HIGH": 0.85,
+}
+
+# Empirically Tuned Risk Tier Thresholds (Stage 3 Optimization)
+# Fine-tuned on multi-year multi-source fused ground truth to eliminate boundary misclassification
+TUNED_RISK_TIER_THRESHOLDS: Dict[str, float] = {
+    "LOW": 0.25,
+    "MODERATE": 0.48,
+    "HIGH": 0.68,
+    "VERY_HIGH": 0.82,
+}
+
+
 # Flexible Column Aliases for Census/PLFS CSV Loaders (Day 3)
 CENSUS_COLUMN_ALIASES = {
     "ward_id": ["ward_id", "ward_no", "ward_code", "ward_number", "wardid", "ward"],
@@ -190,6 +209,10 @@ class Settings(BaseSettings):
     default_lat: float = Field(default=23.03, alias="DEFAULT_LAT")
     default_lon: float = Field(default=72.58, alias="DEFAULT_LON")
     data_cache_dir: str = Field(default=str(CACHE_DATA_DIR), alias="DATA_CACHE_DIR")
+    risk_tier_thresholds: Dict[str, float] = Field(
+        default_factory=lambda: DEFAULT_RISK_TIER_THRESHOLDS.copy(),
+        alias="RISK_TIER_THRESHOLDS"
+    )
 
     # Historical Backtesting Settings (Day 8)
     backtest_start_date: str = Field(default="2010-05-15", alias="BACKTEST_START_DATE")
