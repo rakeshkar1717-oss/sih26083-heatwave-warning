@@ -158,6 +158,10 @@ def test_send_ward_alert_high_risk_success(in_memory_alert_db):
     assert response.success is True
     assert len(mock_sender.sent_messages) == 1
     assert mock_sender.sent_messages[0]["to"] == "+919876543210"
+    # Part E verification: targeted cohort action must be included
+    sent_msg = mock_sender.sent_messages[0]["message"]
+    assert "Priority Action:" in sent_msg
+    assert "EVACUATE INDOOR TRAP" in sent_msg or "MANDATORY WORK CESSATION" in sent_msg
 
     # Verify AlertLog persistence
     logs = in_memory_alert_db.query(AlertLog).filter_by(ward_id="AMD_DANGER").all()

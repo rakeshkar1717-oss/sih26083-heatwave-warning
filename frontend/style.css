@@ -532,6 +532,123 @@ header {
   border: 1px solid rgba(231, 76, 60, 0.45);
 }
 
+/* Data Quality Badges ("Measured" vs "Derived") */
+.badge-quality {
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  display: inline-block;
+}
+
+.badge-measured {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.badge-derived {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Action Advice Box ("What to do") */
+.cohort-action-box {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.cohort-action-box.precaution-action {
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 3px solid #f59e0b;
+  color: #fde68a;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.cohort-action-box.urgent-action {
+  background: rgba(239, 68, 68, 0.18);
+  border-left: 3px solid #ef4444;
+  color: #fca5a5;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.action-heading {
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cohort-action-box.precaution-action .action-heading {
+  color: #fbbf24;
+}
+
+.cohort-action-box.urgent-action .action-heading {
+  color: #f87171;
+}
+
+/* Dominant Risk Driver Line (Part D) */
+.dominant-driver-box {
+  background: rgba(234, 88, 12, 0.12);
+  border: 1px solid rgba(234, 88, 12, 0.35);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  margin-top: 4px;
+}
+
+.dominant-driver-box .driver-label {
+  color: #fdba74;
+  font-weight: 700;
+}
+
+.dominant-driver-box .driver-value {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+/* Traceable Data Sources Button (Part D) */
+.impact-provenance-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.btn-data-sources {
+  background: transparent;
+  border: 1px dashed #475569;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.btn-data-sources:hover {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+
 /* Forecast Chart Card */
 .chart-card {
   background: var(--card-bg);

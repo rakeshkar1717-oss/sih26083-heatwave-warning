@@ -100,6 +100,10 @@ class WardVulnerability(Base):
     count_indoor_labor: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
     count_slum_residents: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
 
+    # Provenance Tracking (Part A)
+    data_source_url: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    data_pulled_at: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships

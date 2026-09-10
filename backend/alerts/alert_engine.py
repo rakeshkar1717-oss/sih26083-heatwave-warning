@@ -18,6 +18,7 @@ from backend.db.models_orm import WardBoundary, WeatherReading, AlertLog
 from backend.alerts.sender_base import AlertSender
 from backend.alerts.twilio_client import TwilioAlertSender
 from backend.alerts.gupshup_client import GupshupAlertSender
+from backend.vulnerability_model.health_consequence_map import get_population_impact
 
 logger = logging.getLogger(__name__)
 
@@ -41,36 +42,40 @@ def compose_public_health_advisory(
     ward_id: str,
     risk_level: RiskLevel,
     temp_c: Optional[float] = None,
-    wbgt_c: Optional[float] = None
+    wbgt_c: Optional[float] = None,
+    dominant_action_info: Optional[str] = None,
 ) -> str:
-    """Compose public health heat advisory conforming to WHO/GHHIN standards."""
+    """Compose public health heat advisory conforming to WHO/GHHIN standards, enriched with cohort action (Part E)."""
     temp_info = f" (Observed: {temp_c:.1f}°C, WBGT: {wbgt_c:.1f}°C)" if temp_c and wbgt_c else ""
+    action_suffix = f" Priority Action: {dominant_action_info}" if dominant_action_info else ""
 
     if risk_level == RiskLevel.EXTREME:
-        return (
+        msg = (
             f"🚨 CRITICAL HEAT EMERGENCY for {ward_name} [{ward_id}]{temp_info}: "
             "Severe risk of life-threatening heatstroke! Cease all outdoor physical labor immediately. "
             "Stay indoors in shaded/cooled rooms. Drink water with ORS/electrolytes every 20 minutes. "
             "Vulnerable elderly and children must report to municipal cooling shelters. Emergency helpline: 108."
         )
     elif risk_level == RiskLevel.VERY_HIGH:
-        return (
+        msg = (
             f"⚠️ SEVERE HEAT ADVISORY for {ward_name} [{ward_id}]{temp_info}: "
             "High danger of heat exhaustion. Avoid direct sun and heavy outdoor labor between 11:00 AM - 4:30 PM. "
             "Stay hydrated and utilize municipal shaded rest points. Watch for dizziness or rapid pulse."
         )
     elif risk_level == RiskLevel.HIGH:
-        return (
+        msg = (
             f"⚠️ HEAT ALERT for {ward_name} [{ward_id}]{temp_info}: "
             "High thermal stress. Hydrate frequently, wear light breathable clothing, and check on elderly neighbors."
         )
     elif risk_level == RiskLevel.MODERATE:
-        return (
+        msg = (
             f"HEAT CAUTION for {ward_name} [{ward_id}]: "
             "Moderate heat conditions. Outdoor workers should take periodic shaded breaks and maintain hydration."
         )
     else:
-        return f"NORMAL CONDITIONS for {ward_name} [{ward_id}]: Baseline municipal heat preparedness active."
+        msg = f"NORMAL CONDITIONS for {ward_name} [{ward_id}]: Baseline municipal heat preparedness active."
+
+    return f"{msg}{action_suffix}"
 
 
 def send_ward_alert(
@@ -127,6 +132,7 @@ def send_ward_alert(
     risk_level = RiskLevel.HIGH
     temp_c = None
     wbgt_c = None
+    dominant_action_info = None
 
     if db is not None:
         ward = db.query(WardBoundary).filter(WardBoundary.ward_id == ward_id).first()
@@ -159,6 +165,28 @@ def send_ward_alert(
         else:
             risk_level = RiskLevel.EXTREME
 
+        # Part E: Extract dominant demographic cohort action for targeted alerting
+        if ward.vulnerability:
+            try:
+                impact = get_population_impact(
+                    ward_data=ward.vulnerability,
+                    risk_tier=risk_level,
+                    final_risk_score=final_risk,
+                )
+                dom_driver = impact.get("dominant_risk_factor", "")
+                segments = impact.get("segments", {})
+                if "Outdoor" in dom_driver and "outdoor_workers" in segments:
+                    dominant_action_info = segments["outdoor_workers"]["action"]
+                elif "Slum" in dom_driver and "slum_residents" in segments:
+                    dominant_action_info = segments["slum_residents"]["action"]
+                elif "Elderly" in dom_driver and "elderly_60plus" in segments:
+                    dominant_action_info = segments["elderly_60plus"]["action"]
+                elif segments:
+                    highest_seg = max(segments.values(), key=lambda s: s.get("estimated_count", 0))
+                    dominant_action_info = highest_seg.get("action")
+            except Exception as err:
+                logger.warning("Could not derive cohort dominant action for ward %s: %s", ward_id, err)
+
     # 3. Severity Threshold Evaluation
     if not force and risk_level in [RiskLevel.LOW, RiskLevel.MODERATE]:
         return AlertResponse(
@@ -174,13 +202,14 @@ def send_ward_alert(
             ),
         )
 
-    # 4. Compose WHO/GHHIN Advisory Text
+    # 4. Compose WHO/GHHIN Advisory Text (Enriched with targeted cohort action)
     advisory_message = compose_public_health_advisory(
         ward_name=ward_name,
         ward_id=ward_id,
         risk_level=risk_level,
         temp_c=temp_c,
         wbgt_c=wbgt_c,
+        dominant_action_info=dominant_action_info,
     )
 
     # 5. Resolve Notification Sender Gateway

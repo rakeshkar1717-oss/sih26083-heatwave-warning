@@ -237,20 +237,24 @@ async function renderWardSidebar(props) {
   // Render 5-Day Forecast Chart in Sidebar
   await renderSidebarForecastChart(props);
 
-  // Render Population Impact Breakdown ("Who is Affected")
-  await renderPopulationImpact(props);
+  // Render Human Impact Card ("Who is Affected")
+  await renderHumanImpactCard(props);
 }
 
 /**
- * Render Population Impact Breakdown Panel ("Who is Affected").
- * Displays absolute population headcounts and clinical health consequence text per cohort.
+ * HumanImpactCard Component ("Who is Affected").
+ * Renders real population counts, data quality badges ("Measured" vs "Derived"),
+ * clinical consequences, actionable prevention guidance ("What to do"),
+ * dominant risk driver, and provenance data links.
  */
-async function renderPopulationImpact(props) {
+async function renderHumanImpactCard(props) {
   if (!props) return;
   const panel = document.getElementById("population-impact-panel");
   const popBadge = document.getElementById("impact-total-pop");
   const summaryText = document.getElementById("impact-summary-text");
   const cardsContainer = document.getElementById("cohort-cards-container");
+  const driverBox = document.getElementById("dominant-risk-driver-box");
+  const driverVal = document.getElementById("dominant-risk-driver-value");
 
   if (!panel || !cardsContainer) return;
 
@@ -284,34 +288,49 @@ async function renderPopulationImpact(props) {
     const isHighOrAbove = ["HIGH", "VERY_HIGH", "EXTREME"].includes(riskLevel);
     const isExtreme = riskLevel === "EXTREME" || riskLevel === "VERY_HIGH";
 
+    const dominantFactor = outdoorPct >= slumPct && outdoorPct >= elderlyPct
+      ? `Outdoor labor exposure (${outdoorPct.toFixed(1)}%)`
+      : (slumPct >= elderlyPct ? `Slum/informal housing density (${slumPct.toFixed(1)}%)` : `Elderly demographic concentration (${elderlyPct.toFixed(1)}%)`);
+
     impactData = {
       ward_id: wardId,
       ward_name: wardName,
       total_population: totalPop,
       risk_level: riskLevel,
+      dominant_risk_factor: dominantFactor,
+      data_source_url: "https://censusindia.gov.in / MoSPI Periodic Labour Force Survey (PLFS)",
+      data_pulled_at: "2026-09-10",
       summary: `Under ${riskLevel.replace('_', ' ')} heat hazard, ${countElderly.toLocaleString()} seniors and ${countOutdoor.toLocaleString()} outdoor laborers in ${wardName} face direct thermal strain.`,
       segments: {
-        children_under_5: {
-          segment_id: "children_under_5",
+        children_0_5: {
+          segment_id: "children_0_5",
           name: "Children (Age 0-5)",
           icon: "👶",
           estimated_count: countChildren,
           percentage: childPct,
+          data_quality: "derived",
           severity: isExtreme ? "CRITICAL" : (isHighOrAbove ? "HIGH" : "MODERATE"),
           consequence: isExtreme
-            ? "Rapid dehydration, electrolyte imbalance, and pediatric hyperthermia risk (Azhar et al. 2014, PLOS ONE)."
-            : "Mild to moderate thermal fatigue; elevated sweating; monitor continuous hydration.",
+            ? "Rapid dehydration, electrolyte shock, febrile delirium, and hypovolemic collapse (Azhar et al. 2014, PLOS ONE)."
+            : "Early clinical dehydration, severe heat rash (miliaria rubra), and rapid core heat gain (WHO 2021 Guidance).",
+          action: isExtreme
+            ? "EMERGENCY: Move to air-conditioned shelter immediately; administer ORS/electrolytes; call 108 if lethargic."
+            : "Keep indoors in cool ventilated shade; offer fluids every 30 minutes; sponge forehead with cool water.",
         },
-        elderly_60_plus: {
-          segment_id: "elderly_60_plus",
+        elderly_60plus: {
+          segment_id: "elderly_60plus",
           name: "Elderly (Age 60+)",
           icon: "👴",
           estimated_count: countElderly,
           percentage: elderlyPct,
+          data_quality: "derived",
           severity: isExtreme ? "CRITICAL" : (isHighOrAbove ? "HIGH" : "MODERATE"),
           consequence: isExtreme
-            ? "Severe cardiovascular strain, ischemic events, and non-exertional heatstroke risk (Ahmedabad HAP 2018)."
-            : "Postural hypotension and elevated cardiac workload under ambient temperature rise.",
+            ? "Catastrophic non-exertional classical heatstroke, myocardial infarction, and ischemic stroke (Ahmedabad HAP 2018)."
+            : "Postural hypotension, heat syncope, and occult dehydration due to impaired baroreflex (WHO/WMO 2015).",
+          action: isExtreme
+            ? "URGENT MEDICAL PRIORITY: Evacuate to municipal cooling shelter; active cold sponging; call 108 immediately."
+            : "Stay indoors between 11 AM - 4 PM; drink water regularly even without thirst; monitor blood pressure.",
         },
         outdoor_workers: {
           segment_id: "outdoor_workers",
@@ -319,21 +338,29 @@ async function renderPopulationImpact(props) {
           icon: "🔨",
           estimated_count: countOutdoor,
           percentage: outdoorPct,
+          data_quality: "derived",
           severity: isExtreme ? "CRITICAL" : (isHighOrAbove ? "HIGH" : "MODERATE"),
           consequence: isExtreme
-            ? "Exertional heat exhaustion, rhabdomyolysis, and acute kidney injury (Ahmedabad Heat Action Plan)."
-            : "Elevated metabolic heat; rest pauses and hydration required when WBGT exceeds safe limits.",
+            ? "Fatal exertional heatstroke, rhabdomyolysis (muscle breakdown), and acute kidney injury (AKI) (NRDC / AMC 2018)."
+            : "Painful exertional heat cramps, heavy sodium deficit, cognitive fatigue, and motor coordination impairment (NDMA).",
+          action: isExtreme
+            ? "MANDATORY WORK CESSATION: Cease all outdoor physical labor between 11:00 AM - 4:30 PM; move to shaded stations."
+            : "Shift heavy labor before 11:00 AM; mandatory 15-min shaded rest breaks every hour; drink 500ml water hourly.",
         },
         slum_residents: {
           segment_id: "slum_residents",
-          name: "Slum & Informal Dwellings",
+          name: "Slum & Informal Housing Residents",
           icon: "🏚️",
           estimated_count: countSlum,
           percentage: slumPct,
+          data_quality: "derived",
           severity: isExtreme ? "CRITICAL" : (isHighOrAbove ? "HIGH" : "MODERATE"),
           consequence: isExtreme
-            ? "Lethal indoor thermal traps due to tin/asbestos roofing without cross-ventilation (Knowlton et al. 2014)."
-            : "Elevated indoor nighttime temperatures preventing physiological nocturnal cooling recovery.",
+            ? "Lethal indoor thermal trap (>48°C indoor heat index), rapid dehydration, and hyperthermia (Knowlton et al. 2014)."
+            : "Chronic nocturnal thermal retention. Tin and asbestos roofing elevates indoor temperatures 3-6°C above ambient levels.",
+          action: isExtreme
+            ? "EVACUATE INDOOR TRAP: Relocate vulnerable family members to municipal air-cooled civic shelters."
+            : "Ensure open cross-ventilation; drape wet gunny bags over tin roofs; spend peak afternoons in shaded centers.",
         },
       },
     };
@@ -347,6 +374,27 @@ async function renderPopulationImpact(props) {
     summaryText.textContent = impactData.summary || "Evaluating demographic exposure to active thermal hazard.";
   }
 
+  // Dominant risk driver line (Part D)
+  if (driverBox && driverVal) {
+    if (impactData.dominant_risk_factor) {
+      driverBox.style.display = "flex";
+      driverVal.textContent = impactData.dominant_risk_factor;
+    } else {
+      driverBox.style.display = "none";
+    }
+  }
+
+  // Provenance modal data elements (Part D)
+  const sourceUrlEl = document.getElementById("modal-source-url");
+  const pulledDateEl = document.getElementById("modal-pulled-date");
+  if (sourceUrlEl && impactData.data_source_url) {
+    sourceUrlEl.textContent = impactData.data_source_url;
+    sourceUrlEl.href = impactData.data_source_url.startsWith("http") ? impactData.data_source_url.split(" ")[0] : "https://censusindia.gov.in";
+  }
+  if (pulledDateEl && impactData.data_pulled_at) {
+    pulledDateEl.textContent = impactData.data_pulled_at;
+  }
+
   // Map risk level to card class
   const tierClassMap = {
     LOW: "tier-low",
@@ -356,11 +404,20 @@ async function renderPopulationImpact(props) {
     EXTREME: "tier-extreme",
   };
   const cardTierClass = tierClassMap[impactData.risk_level] || "tier-moderate";
+  const isUrgent = ["VERY_HIGH", "EXTREME"].includes(impactData.risk_level);
 
   // Build cohort cards HTML
   const segments = Object.values(impactData.segments || {});
   cardsContainer.innerHTML = segments.map((seg) => {
     const sevClass = `sev-${(seg.severity || "moderate").toLowerCase()}`;
+    const qualityBadge = seg.data_quality === "measured"
+      ? `<span class="badge-quality badge-measured">Measured</span>`
+      : `<span class="badge-quality badge-derived">Estimated</span>`;
+
+    const actionBoxClass = (isUrgent || seg.severity === "CRITICAL") ? "urgent-action" : "precaution-action";
+    const actionHeading = (isUrgent || seg.severity === "CRITICAL") ? "🚨 URGENT ACTION:" : "🛡️ WHAT TO DO:";
+    const actionText = seg.action || (isUrgent ? "Evacuate to cooling shelter immediately." : "Drink water regularly and rest in shade.");
+
     return `
       <div class="cohort-card ${cardTierClass}">
         <div class="cohort-header">
@@ -371,9 +428,14 @@ async function renderPopulationImpact(props) {
           <div class="cohort-count-badge">
             ${Number(seg.estimated_count || 0).toLocaleString()}
             <span class="pct-sub">(${Number(seg.percentage || 0).toFixed(1)}%)</span>
+            ${qualityBadge}
           </div>
         </div>
         <div class="cohort-consequence">${seg.consequence}</div>
+        <div class="cohort-action-box ${actionBoxClass}">
+          <div class="action-heading">${actionHeading}</div>
+          <div>${actionText}</div>
+        </div>
         <div class="cohort-footer">
           <span class="cohort-citation">Epidemiological Guidance</span>
           <span class="severity-tag ${sevClass}">${seg.severity}</span>
@@ -382,6 +444,10 @@ async function renderPopulationImpact(props) {
     `;
   }).join("");
 }
+
+// Backward compatibility alias
+const renderPopulationImpact = renderHumanImpactCard;
+
 
 
 /**
@@ -909,6 +975,29 @@ function startAutoRefresh() {
 }
 
 /**
+ * Handle Traceable Data Sources & Methodology Modal (Part D).
+ */
+function bindSourcesModal() {
+  const btnOpen = document.getElementById("btn-view-data-sources");
+  const btnClose = document.getElementById("btn-close-sources-modal");
+  const btnCloseFooter = document.getElementById("btn-close-sources-modal-footer");
+  const modal = document.getElementById("sources-modal");
+
+  if (!modal) return;
+
+  const openModal = () => { modal.style.display = "flex"; };
+  const closeModal = () => { modal.style.display = "none"; };
+
+  if (btnOpen) btnOpen.addEventListener("click", openModal);
+  if (btnClose) btnClose.addEventListener("click", closeModal);
+  if (btnCloseFooter) btnCloseFooter.addEventListener("click", closeModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+}
+
+/**
  * Main Application Bootstrapper.
  */
 async function main() {
@@ -917,6 +1006,7 @@ async function main() {
   bindBacktestToggle();
   bindScopeControls();
   bindInfoModal();
+  bindSourcesModal();
   bindAlertButton();
   await updateSystemStatus();
   await loadDashboardData();

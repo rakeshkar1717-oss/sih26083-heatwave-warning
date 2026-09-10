@@ -39,7 +39,10 @@ from backend.models import (
     PopulationImpactResponse,
 )
 from backend.alerts.alert_engine import send_ward_alert
-from backend.vulnerability_model.health_consequence_map import build_population_impact_breakdown
+from backend.vulnerability_model.health_consequence_map import (
+    build_population_impact_breakdown,
+    get_population_impact as compute_population_impact,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -393,15 +396,21 @@ def get_population_impact(ward_id: str, db: Session = Depends(get_db)) -> Popula
     elderly_pct = float(vuln.elderly_pct) if vuln else 10.0
     outdoor_pct = float(vuln.outdoor_worker_pct) if vuln else 35.0
     slum_pct = float(vuln.slum_pct) if vuln else 20.0
+    green_pct = float(vuln.green_cover_pct) if vuln else 15.0
 
-    breakdown = build_population_impact_breakdown(
-        ward_id=ward.ward_id,
-        ward_name=ward.ward_name,
-        total_population=total_pop,
-        elderly_pct=elderly_pct,
-        outdoor_worker_pct=outdoor_pct,
-        slum_pct=slum_pct,
-        risk_level=risk_tier,
+    breakdown = compute_population_impact(
+        ward_data={
+            "ward_id": ward.ward_id,
+            "ward_name": ward.ward_name,
+            "total_population": total_pop,
+            "elderly_pct": elderly_pct,
+            "outdoor_worker_pct": outdoor_pct,
+            "slum_pct": slum_pct,
+            "green_cover_pct": green_pct,
+            "data_source_url": getattr(vuln, "data_source_url", None),
+            "data_pulled_at": getattr(vuln, "data_pulled_at", None),
+        },
+        risk_tier=risk_tier,
         final_risk_score=final_risk,
     )
 

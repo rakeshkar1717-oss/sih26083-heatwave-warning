@@ -152,17 +152,28 @@
           </div>
         </div>
 
-        <!-- Population Impact Breakdown ("Who is Affected") -->
+        <!-- Human Impact Card ("Who is Affected") -->
         <div class="impact-panel" id="population-impact-panel">
           <div class="impact-panel-header">
-            <h3>👥 Who Is Affected & Clinical Consequences</h3>
+            <h3>👥 Who Is Affected</h3>
             <span class="impact-total-badge" id="impact-total-pop">Pop: --</span>
           </div>
           <p class="impact-summary-note" id="impact-summary-text">
             Select a ward to evaluate demographic cohorts exposed to active thermal stress.
           </p>
           <div class="cohort-cards-grid" id="cohort-cards-container">
-            <!-- Populated dynamically via main.js -->
+            <!-- Populated dynamically via HumanImpactCard in main.js -->
+          </div>
+          <!-- Dominant Risk Driver Line (Part D) -->
+          <div class="dominant-driver-box" id="dominant-risk-driver-box" style="display: none;">
+            <span class="driver-label">🚨 Dominant Risk Driver:</span>
+            <span class="driver-value" id="dominant-risk-driver-value">--</span>
+          </div>
+          <!-- Traceable Data Provenance Button (Part D) -->
+          <div class="impact-provenance-footer">
+            <button id="btn-view-data-sources" class="btn-data-sources" type="button" title="View official Census 2011 & PLFS data provenance">
+              🔗 View Data Sources & Methodology
+            </button>
           </div>
         </div>
 
@@ -243,6 +254,61 @@
       </div>
       <div class="modal-footer">
         <button id="btn-modal-got-it" class="btn-primary">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Traceable Data Sources & Methodology Modal (Part D) -->
+  <div id="sources-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>📊 Traceable Data Sources & Provenance</h2>
+        <button id="btn-close-sources-modal" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-lead">
+          Every number and advisory displayed in the <strong>Human Impact Card</strong> is grounded in verifiable public records. Nothing is fabricated.
+        </p>
+
+        <div class="explainer-section">
+          <h3>1. Official Census & Survey Provenance</h3>
+          <ul>
+            <li>
+              <strong>Primary Source</strong>: <a id="modal-source-url" href="https://censusindia.gov.in" target="_blank" rel="noopener noreferrer">https://censusindia.gov.in / MoSPI Periodic Labour Force Survey (PLFS)</a>
+            </li>
+            <li>
+              <strong>Extraction / Standardization Date</strong>: <span id="modal-pulled-date" class="highlight-date">2026-09-10</span>
+            </li>
+            <li>
+              <strong>Directly Measured Features</strong>: Municipal ward total resident population, senior citizens percentage (60+), informal labor percentage, and slum dwelling household percentage from the Ahmedabad Municipal Corporation (AMC) and Census 2011.
+            </li>
+          </ul>
+        </div>
+
+        <div class="explainer-section">
+          <h3>2. "Measured" vs "Derived" Cohort Accounting</h3>
+          <ul>
+            <li><strong>Total Ward Population</strong>: <span class="badge-measured">Measured</span> from AMC official administrative census records.</li>
+            <li><strong>Children (Age 0–5)</strong>: <span class="badge-derived">Derived</span> at 9.2% benchmark (Census 2011 urban child ratio).</li>
+            <li><strong>Youth (Age 6–17)</strong>: <span class="badge-derived">Derived</span> at 18.8% benchmark (Census 2011 urban youth ratio).</li>
+            <li><strong>Working Adults (Age 18–59)</strong>: <span class="badge-derived">Derived</span> from total population minus dependent cohorts.</li>
+            <li><strong>Outdoor vs Indoor Labor</strong>: <span class="badge-derived">Derived</span> using 45% workforce participation rate (PLFS urban India) minus outdoor informal manual labor.</li>
+          </ul>
+        </div>
+
+        <div class="explainer-section">
+          <h3>3. Clinical & Epidemiological Citations</h3>
+          <ul>
+            <li><strong>WHO/WMO 2015</strong>: <em>Heatwaves and Health: Guidance on Warning-System Development</em> (WMO-No. 1142).</li>
+            <li><strong>WHO 2021</strong>: <em>Public health advice on heat: guidance for clinical and public health practitioners</em>.</li>
+            <li><strong>Azhar et al. 2014</strong>: <em>Heat-Related Mortality in India: Excess All-Cause Mortality Associated with the 2010 Ahmedabad Heat Wave</em>. PLOS ONE, 9(3): e91831.</li>
+            <li><strong>NRDC & AMC 2018</strong>: <em>Ahmedabad Heat Action Plan (HAP): Guide to Extreme Heat Planning</em>.</li>
+            <li><strong>NDMA 2019/2024</strong>: <em>National Guidelines for Preparation of Action Plan - Prevention and Management of Heat Wave</em>.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-close-sources-modal-footer" class="btn-primary">Close Sources</button>
       </div>
     </div>
   </div>

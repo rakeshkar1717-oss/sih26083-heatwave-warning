@@ -207,6 +207,39 @@ class WardVulnerability(BaseModel):
     count_indoor_labor: int = Field(default=0, ge=0, description="Indoor/formal sector workers")
     count_slum_residents: int = Field(default=0, ge=0, description="Residents living in informal/slum dwellings")
 
+    # Explicit named counts (Part A)
+    age_0_5_count: int = Field(default=0, ge=0, description="Children aged 0-5 count")
+    age_6_17_count: int = Field(default=0, ge=0, description="Children/youth aged 6-17 count")
+    age_18_59_count: int = Field(default=0, ge=0, description="Working adults aged 18-59 count")
+    age_60plus_count: int = Field(default=0, ge=0, description="Senior citizens aged 60+ count")
+    outdoor_labor_count: int = Field(default=0, ge=0, description="Outdoor informal labor count")
+    indoor_labor_count: int = Field(default=0, ge=0, description="Indoor formal labor count")
+    non_working_count: int = Field(default=0, ge=0, description="Non-working dependents count")
+    slum_housing_count: int = Field(default=0, ge=0, description="Slum/informal housing resident count")
+
+    # Provenance and Data Quality Metadata (Part A)
+    data_quality: Dict[str, str] = Field(
+        default_factory=lambda: {
+            "total_population": "measured",
+            "age_0_5": "derived",
+            "age_6_17": "derived",
+            "age_18_59": "derived",
+            "elderly": "derived",
+            "outdoor_labor": "derived",
+            "indoor_labor": "derived",
+            "slum": "derived",
+        },
+        description="Data quality labeling: 'measured' vs 'derived' per demographic indicator",
+    )
+    data_source_url: str = Field(
+        default="https://censusindia.gov.in / MoSPI Periodic Labour Force Survey (PLFS)",
+        description="Traceable Census or municipal benchmark source URL",
+    )
+    data_pulled_at: str = Field(
+        default="2026-09-10",
+        description="Date string when demographic data was fetched or standardized",
+    )
+
     # Optional HVI scores
     vulnerability_score: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Calculated HVI score")
     risk_tier: Optional[str] = Field(default=None, description="HVI tier: Low, Medium, High, Extreme")
@@ -217,9 +250,12 @@ class PopulationSegmentImpact(BaseModel):
 
     segment_id: str = Field(..., description="Machine identifier e.g. children_under_5")
     name: str = Field(..., description="Human-readable segment title")
+    icon: Optional[str] = Field(default="👥", description="Icon or emoji representing cohort")
     estimated_count: int = Field(..., ge=0, description="Estimated absolute population count")
     percentage: float = Field(..., ge=0.0, le=100.0, description="Percentage of total ward population")
+    data_quality: str = Field(default="derived", description="'measured' or 'derived' data quality badge")
     consequence: str = Field(..., description="Specific epidemiological/physiological consequence text")
+    action: str = Field(default="", description="Specific public health action (precaution or urgent)")
     severity: str = Field(..., description="Health risk severity level: LOW, MODERATE, HIGH, CRITICAL")
 
 
@@ -229,11 +265,19 @@ class PopulationImpactResponse(BaseModel):
     ward_id: str = Field(..., description="Ward identifier")
     ward_name: str = Field(..., description="Ward name")
     total_population: int = Field(..., ge=0, description="Total ward resident population")
+    risk_tier: str = Field(default="MODERATE", description="Current heatwave risk tier name")
     risk_level: RiskLevel = Field(..., description="Current heatwave risk tier of the ward")
     final_risk_score: float = Field(..., ge=0.0, le=1.0, description="Composite risk score (0.0 to 1.0)")
+    dominant_risk_factor: str = Field(default="", description="Primary demographic exposure factor driving ward vulnerability")
+    data_source_url: str = Field(
+        default="https://censusindia.gov.in / MoSPI Periodic Labour Force Survey (PLFS)",
+        description="Official Census / survey source URL",
+    )
+    data_pulled_at: str = Field(default="2026-09-10", description="Date when data was loaded/updated")
     segments: Dict[str, PopulationSegmentImpact] = Field(..., description="Breakdown by demographic group")
     total_vulnerable_count: int = Field(..., ge=0, description="Combined count of severely vulnerable residents")
     summary: str = Field(..., description="Actionable civic summary of population-level impacts")
+
 
 
 

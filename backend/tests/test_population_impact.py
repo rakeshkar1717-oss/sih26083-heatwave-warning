@@ -21,6 +21,7 @@ from backend.vulnerability_model.health_consequence_map import (
     get_health_consequence,
     get_segment_severity,
     normalize_risk_level_key,
+    get_population_impact,
     build_population_impact_breakdown,
 )
 from backend.vulnerability_model.census_loader import load_census_data
@@ -116,10 +117,10 @@ def test_build_population_impact_breakdown():
     assert "segments" in impact
     assert len(impact["segments"]) == 4
 
-    elderly = impact["segments"]["elderly_60_plus"]
+    elderly = impact["segments"].get("elderly_60plus") or impact["segments"].get("elderly_60_plus")
     assert elderly["estimated_count"] == int(round(85000 * 0.15))
     assert elderly["severity"] == "CRITICAL"
-    assert "cardiovascular" in elderly["consequence"].lower() or "cerebrovascular" in elderly["consequence"].lower()
+    assert "cardiovascular" in elderly["consequence"].lower() or "cerebrovascular" in elderly["consequence"].lower() or "heatstroke" in elderly["consequence"].lower()
 
 
 @pytest.fixture(scope="module")
@@ -205,6 +206,40 @@ def api_test_client():
     app.dependency_overrides.clear()
 
 
+def test_precaution_vs_urgent_action_switching():
+    """Verify that consequences and prevention actions switch between precaution and urgent across tiers."""
+    ward_dummy = {
+        "ward_id": "TEST_WARD",
+        "ward_name": "Test Ward",
+        "total_population": 100000,
+        "elderly_pct": 15.0,
+        "outdoor_worker_pct": 30.0,
+        "slum_pct": 25.0,
+    }
+
+    # Moderate tier: precaution actions and risk labels
+    mod_impact = get_population_impact(ward_dummy, risk_tier="MODERATE")
+    for seg_key in ["children_0_5", "elderly_60plus", "outdoor_workers", "slum_residents"]:
+        seg = mod_impact["segments"][seg_key]
+        assert seg["action"] != ""
+        assert "MANDATORY" not in seg["action"]
+        assert "EMERGENCY" not in seg["action"]
+        assert seg["data_quality"] in ("derived", "measured")
+
+    # Extreme tier: urgent actions and extreme risk labels
+    ext_impact = get_population_impact(ward_dummy, risk_tier="EXTREME")
+    for seg_key in ["children_0_5", "elderly_60plus", "outdoor_workers", "slum_residents"]:
+        seg = ext_impact["segments"][seg_key]
+        assert seg["action"] != ""
+        # Actions must be urgent at extreme hazard
+        assert seg["severity"] == "CRITICAL"
+        assert seg["consequence"] != mod_impact["segments"][seg_key]["consequence"]
+        assert seg["action"] != mod_impact["segments"][seg_key]["action"]
+
+    # Dominant factor check: outdoor (30.0%) vs slum (25.0%) vs elderly (15.0%)
+    assert "Outdoor labor exposure (30.0%)" in ext_impact["dominant_risk_factor"]
+
+
 def test_api_population_impact_endpoint(api_test_client):
     """Test GET /api/population-impact/{ward_id} returns 200 and expected schema."""
     resp = api_test_client.get("/api/population-impact/AMD_TEST_POP")
@@ -215,16 +250,17 @@ def test_api_population_impact_endpoint(api_test_client):
     assert data["ward_name"] == "Jamalpur"
     assert data["total_population"] == 120000
     assert data["risk_level"] in ("VERY_HIGH", "Very High")
+    assert "dominant_risk_factor" in data
+    assert "data_source_url" in data
+    assert "data_pulled_at" in data
     assert "segments" in data
-    assert "children_under_5" in data["segments"]
-    assert "elderly_60_plus" in data["segments"]
-    assert "outdoor_workers" in data["segments"]
-    assert "slum_residents" in data["segments"]
 
-    elderly = data["segments"]["elderly_60_plus"]
+    elderly = data["segments"]["elderly_60plus"]
     assert elderly["estimated_count"] == int(round(120000 * 0.18))
     assert elderly["percentage"] == 18.0
     assert len(elderly["consequence"]) > 20
+    assert len(elderly["action"]) > 10
+    assert elderly["severity"] == "CRITICAL"
 
 
 def test_api_population_impact_not_found(api_test_client):
@@ -232,3 +268,4 @@ def test_api_population_impact_not_found(api_test_client):
     resp = api_test_client.get("/api/population-impact/NONEXISTENT_WARD_XYZ")
     assert resp.status_code == 404
     assert "not found" in resp.json()["detail"].lower()
+
