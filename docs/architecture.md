@@ -140,6 +140,8 @@ $$\text{Final Risk} = 0.60 \cdot \text{Thermal Hazard Score} + 0.40 \cdot \text{
 | `/api/alert/trigger` | `POST` | `AlertResponse` Model | Triggers Twilio/Gupshup SMS/WhatsApp dispatch |
 | `/api/population-impact/{ward_id}` | `GET` | `PopulationImpactResponse` | Absolute cohort headcounts & clinical health actions |
 | `/api/personal-risk/calculate` | `POST` | `PersonalRiskResponse` | Personalized real-time heat hazard score, 6-factor points breakdown & clinical guidance |
+| `/api/profession-modes` | `GET` | List of `ProfessionModeDetail` | Metadata for 6 pre-configured occupational modes |
+| `/api/profession-mode/{mode_id}` | `GET` | `ProfessionModeResponse` | Diurnal 5-hour risk timeline, peak risk hour & role-specific prevention protocols |
 | `/api/copilot/chat` | `POST` | `CopilotChatResponse` | Conversational personal thermal risk & dashboard guidance |
 | `/api/backtest/summary` | `GET` | Historical event metadata | Benchmark citations and peak disaster statistics |
 | `/api/backtest/timeline` | `GET` | 13-day historical trajectory | Daily historical heatwave progression (May 2010) |
@@ -226,6 +228,37 @@ A dedicated interactive interface sitting alongside the municipal ward map, enab
 
 ---
 
+### 3.3 Profession Modes & Diurnal Hourly Risk Forecasting Subsystem (`/backend/profession_modes`)
+
+```
++---------------------------------------------------------------------------------------------------+
+| OCCUPATIONAL ROLE SELECTION (Student, Delivery, Construction, Elderly Care, Exercise, Farmer)     |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| 1. COHORT METRIC MAPPING (mode_config.py)                                                         |
+|   - Maps role to AgeGroup, OccupationType, ISO 8996 Metabolic Exertion (W/m²), Exposure Duration   |
+|   - Standardizes clinical prevention actions from health_consequence_map.py                       |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| 2. DIURNAL METEOROLOGICAL PROGRESSION MODEL (hourly_risk_engine.py)                              |
+|   - Projects forward hourly weather using a physically grounded half-sine solar zenith curve      |
+|   - Solar irradiance peaks at 13:00, dry-bulb air temp peaks at 15:00, with inverse RH modulation|
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| 3. HOURLY EVALUATION THROUGH 6-FACTOR PERSONAL RISK ENGINE                                        |
+|   - Calculates ISO 7243 Liljegren WBGT and NOAA Heat Index for each hour in [H_0, ..., H_4]       |
+|   - Runs compute_factor_breakdown() across 6 factors to generate hourly risk scores and tiers     |
+|   - Identifies peak risk hour window and generates tailored occupational prevention protocols     |
++---------------------------------------------------------------------------------------------------+
+```
+
+---
 
 ### 4. Scientific Validation & Empirical Benchmarks
 

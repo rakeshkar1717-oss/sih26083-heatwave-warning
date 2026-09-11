@@ -160,4 +160,31 @@ export async function calculatePersonalRisk(payload) {
   return handleResponse(response);
 }
 
+/**
+ * Retrieve list of all 6 curated profession modes.
+ * GET /api/profession-modes
+ */
+export async function getProfessionModes() {
+  const response = await fetch(`${BASE_URL}/api/profession-modes`);
+  return handleResponse(response);
+}
+
+/**
+ * Retrieve hourly risk trajectory and tailored advice for a specific profession mode.
+ * GET /api/profession-mode/{modeId}
+ */
+export async function getProfessionModeRisk(modeId, params = {}) {
+  const query = new URLSearchParams();
+  if (params.ward_id) query.append("ward_id", params.ward_id);
+  if (params.lat != null) query.append("lat", params.lat);
+  if (params.lon != null) query.append("lon", params.lon);
+  if (params.location) query.append("location", params.location);
+  if (params.hours_ahead != null) query.append("hours_ahead", params.hours_ahead);
+
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  const response = await fetch(`${BASE_URL}/api/profession-mode/${encodeURIComponent(modeId)}${qs}`);
+  return handleResponse(response);
+}
+
+
 

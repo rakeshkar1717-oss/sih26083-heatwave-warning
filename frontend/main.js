@@ -1124,12 +1124,13 @@ function bindHeatCopilot() {
 }
 
 /**
- * Tab Navigation Controller (Ward Map | Personal Heat Twin | Backtest Mode).
+ * Tab Navigation Controller (Ward Map | Personal Heat Twin | Profession Modes | Backtest Mode).
  */
 function bindNavTabs() {
   const tabBtns = document.querySelectorAll(".nav-tab-btn");
   const mapView = document.getElementById("main-container");
   const twinView = document.getElementById("personal-heat-twin-view");
+  const professionView = document.getElementById("profession-modes-view");
 
   const switchTab = (tabName) => {
     tabBtns.forEach((btn) => {
@@ -1143,6 +1144,7 @@ function bindNavTabs() {
     if (tabName === "map-view") {
       if (mapView) mapView.style.display = "flex";
       if (twinView) twinView.style.display = "none";
+      if (professionView) professionView.style.display = "none";
       if (state.map) {
         setTimeout(() => {
           state.map.invalidateSize();
@@ -1151,11 +1153,19 @@ function bindNavTabs() {
     } else if (tabName === "heat-twin-view") {
       if (mapView) mapView.style.display = "none";
       if (twinView) twinView.style.display = "block";
+      if (professionView) professionView.style.display = "none";
       populateTwinWards();
+    } else if (tabName === "professions-view") {
+      if (mapView) mapView.style.display = "none";
+      if (twinView) twinView.style.display = "none";
+      if (professionView) professionView.style.display = "block";
+      populateProfessionWards();
+      loadProfessionMode(currentSelectedProfessionMode || "delivery_worker");
     } else if (tabName === "backtest") {
       // Toggle backtest and stay in map view
       if (mapView) mapView.style.display = "flex";
       if (twinView) twinView.style.display = "none";
+      if (professionView) professionView.style.display = "none";
       const backtestToggleBtn = document.getElementById("btn-toggle-backtest");
       if (backtestToggleBtn) {
         backtestToggleBtn.click();
@@ -1190,6 +1200,14 @@ function bindNavTabs() {
   const returnBtn = document.getElementById("btn-back-to-map");
   if (returnBtn) {
     returnBtn.addEventListener("click", () => {
+      switchTab("map-view");
+    });
+  }
+
+  // Bind return-to-map button inside profession modes card
+  const returnModesBtn = document.getElementById("btn-modes-return-map");
+  if (returnModesBtn) {
+    returnModesBtn.addEventListener("click", () => {
       switchTab("map-view");
     });
   }
@@ -1456,6 +1474,226 @@ function renderPersonalRiskResults(result, requestPayload) {
 }
 
 /**
+ * State for Profession Modes.
+ */
+let currentSelectedProfessionMode = "delivery_worker";
+let professionGpsCoords = { lat: null, lon: null };
+
+/**
+ * Populate Ward selector in Profession Modes from loaded features.
+ */
+function populateProfessionWards() {
+  const wardSelect = document.getElementById("modes-ward-select");
+  if (!wardSelect || wardSelect.options.length > 5) return;
+
+  if (state.geojsonData && state.geojsonData.features) {
+    const wardFeatures = state.geojsonData.features.filter(
+      (f) => f.properties && f.properties.ward_id
+    );
+    if (wardFeatures.length > 0) {
+      wardSelect.innerHTML = "";
+      // Sort alphabetically by ward_name
+      const sorted = [...wardFeatures].sort((a, b) =>
+        (a.properties.ward_name || "").localeCompare(b.properties.ward_name || "")
+      );
+      sorted.forEach((wf) => {
+        const opt = document.createElement("option");
+        opt.value = wf.properties.ward_id;
+        opt.textContent = `${wf.properties.ward_name} (${wf.properties.ward_id})`;
+        wardSelect.appendChild(opt);
+      });
+      // Select currently inspected ward if available
+      if (state.selectedWardProps && state.selectedWardProps.ward_id) {
+        wardSelect.value = state.selectedWardProps.ward_id;
+      }
+    }
+  }
+}
+
+/**
+ * Load and render hourly risk timeline for the specified profession mode.
+ */
+async function loadProfessionMode(modeId) {
+  currentSelectedProfessionMode = modeId;
+
+  // Highlight active mode card
+  const cards = document.querySelectorAll(".mode-card");
+  cards.forEach((c) => {
+    if (c.getAttribute("data-mode") === modeId) {
+      c.classList.add("active");
+    } else {
+      c.classList.remove("active");
+    }
+  });
+
+  const wardSelect = document.getElementById("modes-ward-select");
+  const wardId = wardSelect ? wardSelect.value : "AMD_01";
+
+  const params = {
+    ward_id: wardId,
+    hours_ahead: 5,
+  };
+  if (professionGpsCoords.lat != null && professionGpsCoords.lon != null) {
+    params.lat = professionGpsCoords.lat;
+    params.lon = professionGpsCoords.lon;
+  }
+
+  // Visual loading feedback
+  const titleEl = document.getElementById("detail-mode-title");
+  if (titleEl) {
+    titleEl.style.opacity = "0.5";
+  }
+
+  try {
+    const data = await api.getProfessionModeRisk(modeId, params);
+    renderProfessionModeDetail(data);
+  } catch (err) {
+    console.error("Failed to load profession mode:", err);
+  } finally {
+    if (titleEl) {
+      titleEl.style.opacity = "1";
+    }
+  }
+}
+
+/**
+ * Render selected profession mode detail card.
+ */
+function renderProfessionModeDetail(data) {
+  if (!data) return;
+
+  // Mode Icon, Title, Subtitle
+  const iconEl = document.getElementById("detail-mode-icon");
+  const titleEl = document.getElementById("detail-mode-title");
+  const subEl = document.getElementById("detail-mode-subtitle");
+
+  if (iconEl) iconEl.textContent = data.icon || "💼";
+  if (titleEl) titleEl.textContent = `${data.display_name.toUpperCase()} MODE`;
+  if (subEl) subEl.textContent = `${data.subtitle} • ${data.ward_name} [${data.ward_id}]`;
+
+  // Current Risk Box
+  const scoreBadge = document.getElementById("detail-current-score");
+  const dotEl = document.getElementById("detail-current-dot");
+  const tierBadge = document.getElementById("detail-current-tier");
+
+  if (scoreBadge) scoreBadge.textContent = Math.round(data.current_risk_score);
+  if (dotEl) {
+    dotEl.style.backgroundColor = data.current_risk_color;
+    dotEl.style.boxShadow = `0 0 10px ${data.current_risk_color}`;
+  }
+  if (tierBadge) {
+    tierBadge.textContent = data.current_risk_tier.replace(/_/g, " ");
+    tierBadge.style.backgroundColor = data.current_risk_color;
+  }
+
+  // Hourly Timeline Grid
+  const timelineGrid = document.getElementById("detail-hourly-timeline");
+  if (timelineGrid) {
+    timelineGrid.innerHTML = "";
+    (data.hourly_breakdown || []).forEach((hour) => {
+      const isPeak = (data.peak_hour_range && hour.hour_range === data.peak_hour_range);
+      const card = document.createElement("div");
+      card.className = `timeline-hour-card ${isPeak ? "peak-hour" : ""}`;
+      card.innerHTML = `
+        <div class="hour-card-time">
+          <span>${hour.hour_range}</span>
+          ${isPeak ? '<span class="hour-peak-badge">Peak Heat</span>' : ""}
+        </div>
+        <div class="hour-card-tier-row">
+          <span class="hour-tier-pill" style="background: ${hour.risk_color}">
+            <span class="risk-dot" style="width: 8px; height: 8px; background: #ffffff;"></span>
+            ${hour.risk_tier.replace(/_/g, " ")}
+          </span>
+          <span class="hour-score-val" style="color: ${hour.risk_color}">${Math.round(hour.risk_score)}</span>
+        </div>
+        <div class="hour-card-metrics">
+          <span>🌡️ Temp: <strong>${Math.round(hour.temp_c)}°C</strong></span>
+          <span>💧 WBGT: <strong>${Math.round(hour.wbgt_c)}°C</strong></span>
+        </div>
+      `;
+      timelineGrid.appendChild(card);
+    });
+  }
+
+  // Recommended Actions List
+  const recList = document.getElementById("detail-recommendations-list");
+  if (recList) {
+    recList.innerHTML = "";
+    (data.recommendations || []).forEach((rec) => {
+      const item = document.createElement("div");
+      item.className = "recommendation-item-card";
+      item.innerHTML = `
+        <span class="rec-arrow">&rarr;</span>
+        <div class="rec-content">
+          <span class="rec-text">${rec.action_text}</span>
+          ${rec.citation ? `<span class="rec-citation">Reference: ${rec.citation}</span>` : ""}
+        </div>
+      `;
+      recList.appendChild(item);
+    });
+  }
+}
+
+/**
+ * Bind interactive controls for Profession Modes.
+ */
+function bindProfessionModes() {
+  const cards = document.querySelectorAll(".mode-card");
+  cards.forEach((card) => {
+    card.addEventListener("click", () => {
+      const mode = card.getAttribute("data-mode");
+      if (mode) {
+        loadProfessionMode(mode);
+      }
+    });
+  });
+
+  const wardSelect = document.getElementById("modes-ward-select");
+  if (wardSelect) {
+    wardSelect.addEventListener("change", () => {
+      loadProfessionMode(currentSelectedProfessionMode);
+    });
+  }
+
+  const gpsBtn = document.getElementById("btn-modes-gps");
+  if (gpsBtn) {
+    gpsBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
+      gpsBtn.textContent = "📡 GPS...";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          professionGpsCoords.lat = pos.coords.latitude;
+          professionGpsCoords.lon = pos.coords.longitude;
+          gpsBtn.textContent = "📍 Active";
+          loadProfessionMode(currentSelectedProfessionMode);
+        },
+        (err) => {
+          console.warn("GPS error:", err);
+          gpsBtn.textContent = "📍 GPS";
+          alert("Could not retrieve GPS fix. Defaulting to ward selection.");
+        },
+        { timeout: 7000 }
+      );
+    });
+  }
+
+  // Quick Compare Button: Student vs Farmer
+  const compareBtn = document.getElementById("btn-compare-contrast");
+  if (compareBtn) {
+    compareBtn.addEventListener("click", () => {
+      if (currentSelectedProfessionMode === "farmer") {
+        loadProfessionMode("student");
+      } else {
+        loadProfessionMode("farmer");
+      }
+    });
+  }
+}
+
+/**
  * Main Application Bootstrapper.
  */
 async function main() {
@@ -1464,6 +1702,7 @@ async function main() {
   bindBacktestToggle();
   bindNavTabs();
   bindPersonalHeatTwin();
+  bindProfessionModes();
   bindScopeControls();
   bindInfoModal();
   bindSourcesModal();
@@ -1472,6 +1711,7 @@ async function main() {
   await updateSystemStatus();
   await loadDashboardData();
   populateTwinWards();
+  populateProfessionWards();
   startAutoRefresh();
 }
 
@@ -1481,4 +1721,5 @@ if (document.readyState === "loading") {
 } else {
   main();
 }
+
 

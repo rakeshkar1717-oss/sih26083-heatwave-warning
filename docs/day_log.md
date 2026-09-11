@@ -829,3 +829,70 @@ Implement a standalone, interactive **"Personal Heat Twin"** feature sitting alo
 - **Total Test Suite Status**: **97 Passed, 0 Failed (100% Pass Rate)** in 5.83s.
 - **Additive Verification**: All existing routes (`/api/wards/geojson`, `/api/risk/{ward_id}`, `/api/weather/{ward_id}`, `/api/copilot/chat`, `/api/alert/trigger`) remain 100% operational.
 
+---
+
+## [Day 17] Profession Modes & Diurnal Hour-by-Hour Risk Forecasting Engine
+
+### Objective
+Implement the **"Profession Modes"** interface and engine on top of the SIH26083 platform, transitioning from generic single-score city warnings to role-specific, hour-by-hour operational intelligence:
+1. **Curated Profession Modes Configuration (`/backend/profession_modes/mode_config.py`)**: Define 6 occupational roles (*Student, Delivery Worker, Construction Worker, Elderly Care, Outdoor Exercise, Farmer*) mapped directly to biophysical parameters: demographic cohort, ISO 8996 metabolic rate, outdoor exposure duration, and clinical prevention protocols from `health_consequence_map.py`.
+2. **Diurnal Hourly Risk Engine (`/backend/profession_modes/hourly_risk_engine.py`)**: Simulate diurnal hourly meteorological progression (solar zenith half-sine curve peaking at 13:00, dry-bulb air temperature peaking at 15:00, and inverse relative humidity modulation), evaluating each forward projection hour through the established 6-factor Personal Heat Twin engine.
+3. **REST API Microservices (`backend/api/main.py`)**:
+   - `GET /api/profession-modes`: Returns metadata for all 6 curated roles.
+   - `GET /api/profession-mode/{mode_id}`: Returns current risk, peak risk hour window, 5-hour forward timeline, and bulleted occupational recommendations.
+4. **Frontend Standalone Interface (`frontend/`)**:
+   - Primary navigation tab: **"💼 Profession Modes"** with "New" badge.
+   - Top 6-card role selector bar with instant active state highlighting.
+   - Detailed presentation panel matching the reference design: prominent "Current risk: XX [colored dot] [TIER]" display, "Next 5 Hours:" hourly projection grid with peak heat badges, and "Recommended:" action list with bold arrow bullets (`&rarr;`).
+   - Ward selector and GPS coordinate resolution for hyper-local microclimates.
+   - Quick toggle button: **"⚡ Compare Student vs Farmer"** for live hackathon contrast demonstration.
+5. **Demonstration Script & Evidence (`DEMO_SCRIPT.md`)**: Add Phase 3C guiding presenters to contrast Student Mode (43.6, MODERATE) vs Farmer Mode (65.6, HIGH) for the exact same location and hour.
+
+---
+
+### Technical Implementation
+
+#### 1. Backend Profession Modes Subsystem (`backend/profession_modes/`)
+- **Mode Definitions (`mode_config.py`)**:
+  - `student`: Youth (0-17), indoor formal, walking/transit, 45 min duration. Hydration and campus corridor shade protocols.
+  - `delivery_worker`: Adult (18-30), outdoor gig labor, moderate exertion, 120 min continuous road exposure. Cool vest, electrolyte replenishment, and noon ride pauses.
+  - `construction_worker`: Adult (31-45), outdoor heavy manual labor, 180 min exposure. Mandatory shaded rest cycles, hard hat cooling inserts, and buddy monitoring.
+  - `elderly_care`: Senior citizen (60+), indoor homebound, resting, 30 min incidental exposure. Indoor cross-ventilation, caregiver check-ins, and daytime wet-sponge cooling.
+  - `outdoor_exercise`: Adult (18-30), recreational cardio/athletics, 60 min strenuous exertion. Rescheduling workouts to pre-dawn (<06:30 AM) or post-sunset (>07:00 PM).
+  - `farmer`: Adult (46-59), outdoor agricultural labor, heavy physical exertion, 240 min continuous field exposure. Dawn shift transfers (05:30–09:30 AM), machan canopy rest, and field lemon-salt hydration.
+- **Pydantic Schemas (`profession_schema.py`)**:
+  - `RecommendationItem`: Structured prevention protocol with action text, type, and medical guideline citation.
+  - `HourlyRiskPoint`: Projected hour offset, label, time range, risk score (0-100), risk tier, theme color, temperature (°C), WBGT (°C), Heat Index (°C), and UTCI (°C).
+  - `ProfessionModeResponse`: Consolidated response containing current score, tier, peak hour window, peak score, hourly breakdown, and clinical recommendations.
+- **Hourly Risk Engine (`hourly_risk_engine.py`)**:
+  - Diurnal modeling function `simulate_diurnal_hourly_weather()` applies physically grounded diurnal scaling based on local solar hour without claiming fabricated micro-sensor feeds.
+  - Integrates `resolve_user_location()` with automated fallback database session handling for unit testing.
+  - Evaluates each forecasted hour using `compute_factor_breakdown()` and calibrated `_classify_personal_risk_tier()`.
+
+#### 2. REST API Integration (`backend/api/main.py`)
+- Mounted `GET /api/profession-modes` returning list of `ProfessionModeDetail`.
+- Mounted `GET /api/profession-mode/{mode_id}` accepting query parameters `ward_id`, `lat`, `lon`, and `hours_ahead` (default 5).
+
+#### 3. Frontend Implementation (`frontend/`)
+- **Top Nav Bar (`index.html`)**: Added `#tab-btn-professions` with icon 💼 and "New" badge.
+- **Dedicated View (`#profession-modes-view`)**: Responsive selector grid with 6 cards and detail panel.
+- **Styling (`style.css`)**: Dark-mode glassmorphism cards, glowing status dots, peak hour badges, and responsive wrapping for mobile/projector viewports.
+- **Controller Logic (`main.js`)**:
+  - Extended `bindNavTabs()` to seamlessly toggle between Ward Map, Personal Heat Twin, Profession Modes, and Backtest views.
+  - Added `loadProfessionMode()` and `renderProfessionModeDetail()` for fast switching without full page reloads.
+  - Bound GPS auto-detection and ward dropdown synchronization.
+  - Bound `#btn-compare-contrast` for instantaneous switching between Student and Farmer modes.
+
+---
+
+### Verification and Test Results
+- **Unit & Integration Tests (`backend/tests/test_profession_modes.py`)**:
+  - Verified metadata endpoint returns exactly 6 curated modes.
+  - Verified invalid mode identifier returns HTTP 404.
+  - Verified default 5-hour forward timeline generation with valid scores ($0 \le \text{score} \le 100$).
+  - Verified peak hour range identification and diurnal variation.
+  - **Empirical Contrast Proof**: Farmer risk score (65.6, HIGH) significantly exceeds Student risk score (43.6, MODERATE) under identical atmospheric conditions ($\Delta = +22.0$ points).
+- **Full Test Suite Status**: **105 passed, 0 failed (100% pass rate)** in 6.04s.
+- **Master Pipeline Verification**: `demo_full_pipeline.py` executed with all 8 core subsystems fully operational.
+
+

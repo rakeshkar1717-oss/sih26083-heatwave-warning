@@ -69,6 +69,10 @@
       <button class="nav-tab-btn" id="tab-btn-twin" data-tab="heat-twin-view">
         <span class="tab-icon">👤</span>
         <span class="tab-label">Personal Heat Twin</span>
+      </button>
+      <button class="nav-tab-btn" id="tab-btn-professions" data-tab="professions-view">
+        <span class="tab-icon">💼</span>
+        <span class="tab-label">Profession Modes</span>
         <span class="tab-badge">New</span>
       </button>
       <button class="nav-tab-btn" id="tab-btn-backtest" data-tab="backtest">
@@ -408,6 +412,138 @@
               📸 Print / Save Profile
             </button>
             <button type="button" id="btn-back-to-map" class="btn-result-action btn-return-map" title="Switch back to municipal ward choropleth view">
+              🗺️ Return to Ward Map
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standalone Profession Modes View -->
+  <div id="profession-modes-view" class="profession-modes-container" style="display: none;">
+    <div class="profession-modes-layout">
+      <!-- Top Section: Mode Selector Bar (6 Cards/Buttons) -->
+      <div class="modes-selector-header">
+        <div class="selector-title-row">
+          <div>
+            <h2>💼 Select Your Profession Mode</h2>
+            <p class="selector-subtitle">Tailored hour-by-hour heat risk trajectories and clinical action protocols customized for your occupational exposure.</p>
+          </div>
+          <!-- Location selector for profession modes -->
+          <div class="modes-location-box">
+            <label for="modes-ward-select">Ward:</label>
+            <select id="modes-ward-select" class="modes-select">
+              <option value="AMD_01">Navrangpura (AMD_01)</option>
+            </select>
+            <button type="button" id="btn-modes-gps" class="btn-modes-gps" title="Auto-detect current GPS location">
+              📍 GPS
+            </button>
+          </div>
+        </div>
+
+        <div class="modes-grid-cards" id="modes-grid-cards">
+          <!-- 6 Cards: Student, Delivery Worker, Construction Worker, Elderly Care, Outdoor Exercise, Farmer -->
+          <button class="mode-card" data-mode="student">
+            <span class="mode-card-icon">🎓</span>
+            <div class="mode-card-text">
+              <span class="mode-card-title">Student</span>
+              <span class="mode-card-desc">Transit & Campus</span>
+            </div>
+          </button>
+
+          <button class="mode-card active" data-mode="delivery_worker">
+            <span class="mode-card-icon">🛵</span>
+            <div class="mode-card-text">
+              <span class="mode-card-title">Delivery Worker</span>
+              <span class="mode-card-desc">Continuous Roadway</span>
+            </div>
+          </button>
+
+          <button class="mode-card" data-mode="construction_worker">
+            <span class="mode-card-icon">🏗️</span>
+            <div class="mode-card-text">
+              <span class="mode-card-title">Construction Worker</span>
+              <span class="mode-card-desc">Heavy Manual Site</span>
+            </div>
+          </button>
+
+          <button class="mode-card" data-mode="elderly_care">
+            <span class="mode-card-icon">👵</span>
+            <div class="mode-card-text">
+              <span class="mode-card-title">Elderly Care</span>
+              <span class="mode-card-desc">Senior & Homebound</span>
+            </div>
+          </button>
+
+          <button class="mode-card" data-mode="outdoor_exercise">
+            <span class="mode-card-icon">🏃</span>
+            <div class="mode-card-text">
+              <span class="mode-card-title">Outdoor Exercise</span>
+              <span class="mode-card-desc">Athletics & Cardio</span>
+            </div>
+          </button>
+
+          <button class="mode-card" data-mode="farmer">
+            <span class="mode-card-icon">🌾</span>
+            <div class="mode-card-text">
+              <span class="mode-card-title">Farmer</span>
+              <span class="mode-card-desc">Agricultural Field</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Section: Selected Mode Detailed Card (Matching DELIVERY MODE reference design) -->
+      <div class="profession-detail-card" id="profession-detail-card">
+        <div class="detail-card-header">
+          <div class="detail-header-left">
+            <span class="detail-mode-icon" id="detail-mode-icon">🛵</span>
+            <div>
+              <h2 id="detail-mode-title">DELIVERY MODE</h2>
+              <span class="detail-subtitle" id="detail-mode-subtitle">Two-Wheeler & Gig Courier Exposure</span>
+            </div>
+          </div>
+          <div class="detail-current-risk-box">
+            <span class="current-risk-label">Current risk:</span>
+            <span class="current-risk-score-badge" id="detail-current-score">78</span>
+            <span class="risk-dot" id="detail-current-dot"></span>
+            <span class="current-risk-tier-badge" id="detail-current-tier">HIGH</span>
+          </div>
+        </div>
+
+        <!-- Next N Hours Timeline -->
+        <div class="hourly-forecast-section">
+          <div class="section-badge-header">
+            <h3>⏰ Next 5 Hours:</h3>
+            <span class="hourly-subnote">Diurnal WBGT & apparent heat projection</span>
+          </div>
+          <div class="hourly-timeline-grid" id="detail-hourly-timeline">
+            <!-- Populated dynamically with hour range, tier badge, color dot, temp, WBGT -->
+          </div>
+        </div>
+
+        <!-- Recommended Actions Section -->
+        <div class="recommended-actions-section">
+          <div class="section-badge-header">
+            <h3>🛡️ Recommended:</h3>
+            <span class="hourly-subnote">Role-specific prevention protocols</span>
+          </div>
+          <div class="recommended-actions-list" id="detail-recommendations-list">
+            <!-- Populated dynamically with arrow bullets -->
+          </div>
+        </div>
+
+        <!-- Mode Footer / Quick Compare -->
+        <div class="detail-card-footer">
+          <div class="footer-note">
+            <span>ℹ️ Risk calculated using ISO 8996 metabolic rate and localized outdoor WBGT.</span>
+          </div>
+          <div class="footer-actions">
+            <button type="button" id="btn-compare-contrast" class="btn-detail-action" title="Compare this role against Student / Farmer mode">
+              ⚡ Compare Student vs Farmer
+            </button>
+            <button type="button" id="btn-modes-return-map" class="btn-detail-action btn-return-map" title="Switch back to municipal ward map">
               🗺️ Return to Ward Map
             </button>
           </div>

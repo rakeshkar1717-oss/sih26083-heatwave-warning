@@ -79,7 +79,27 @@
 
 ---
 
-### Phase 4: THE CLINCHER — Live Historical Backtesting (Minute 3:45 - 4:30)
+### Phase 3C: Profession Modes & Role-Specific Diurnal Action (Minute 3:45 - 4:20)
+> **Speaker Action**: Click the top-level navigation tab: **"💼 Profession Modes"**.
+> Point to the 6 occupational role cards: *Student, Delivery Worker, Construction Worker, Elderly Care, Outdoor Exercise, Farmer*.
+> 1. Click **"Delivery Worker"**: Point to the "Current risk: 78 [dot] HIGH" badge, the Next 5 Hours timeline showing diurnal progression, and the role-specific prevention protocols.
+> 2. **The "Killer Contrast" Live Demo**: Click **"Student"** vs **"Farmer"** (or click the quick toggle **"⚡ Compare Student vs Farmer"**).
+>    - For **Student**: Risk is **43.6 (MODERATE)**. Recommendations focus on campus hydration and avoiding outdoor sports during noon.
+>    - For **Farmer**: In the *exact same ward at the exact same minute*, risk leaps to **65.6 (HIGH)** peaking at **67.4**. Recommendations switch to agricultural field protocols: shifting irrigation to dawn (05:30-09:30 AM), mandatory canopy rest, and lemon-salt electrolytes.
+> 3. Point to the hour-by-hour timeline: explain how our engine calculates the solar zenith diurnal curve so outdoor gig workers know exactly which hours to pause operations.
+
+* **Speaker Script**:
+  > *"Municipal heat advisories usually broadcast a single blanket warning to 6 million citizens. But a student sitting in an air-conditioned college building faces a completely different biophysical reality than a delivery courier on an asphalt road or a farmer weeding an open field.
+  > 
+  > In our **Profession Modes**, we pre-configure 6 frontline occupational cohorts. Watch what happens when we switch between **Student Mode** and **Farmer Mode** in Navrangpura:
+  > 
+  > Under the exact same atmospheric temperature, the Student's personal risk score is **43.6 (MODERATE)**, while the Farmer jumps to **65.6 (HIGH)**. Our diurnal engine projects the next 5 hours of solar radiation and wet-bulb globe temperature, warning the farmer that risk will peak at 67.4 between 1 PM and 2 PM. 
+  > 
+  > Instead of telling a farmer to 'stay indoors'—which is impossible for agrarian livelihoods—our system delivers pragmatic, occupationally realistic interventions: dawn shift adjustments, machan shade rest, and field hydration protocols."*
+
+---
+
+### Phase 4: THE CLINCHER — Live Historical Backtesting (Minute 4:20 - 5:05)
 > **Speaker Action**: Click the glowing button: **"🕒 Backtest Mode (May 2010)"**.
 > Point to the map instantly turning red/purple, the top emergency banner updating, and the sidebar chart switching to the May 15–27, 2010 trajectory.
 

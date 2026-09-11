@@ -2279,5 +2279,439 @@ header {
   background: #ea580c;
 }
 
+/* ==========================================================================
+   Day 17: Standalone Profession Modes Styles
+   ========================================================================== */
+.profession-modes-container {
+  flex: 1;
+  height: calc(100vh - 110px);
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--bg-dark);
+}
+
+.profession-modes-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modes-selector-header {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.selector-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.selector-title-row h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.selector-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.modes-location-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.modes-select {
+  background: #0f172a;
+  border: 1px solid var(--border-color);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.btn-modes-gps {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #38bdf8;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modes-gps:hover {
+  background: #334155;
+}
+
+.modes-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1024px) {
+  .modes-grid-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .modes-grid-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mode-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #ffffff;
+}
+
+.mode-card:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: rgba(249, 115, 22, 0.5);
+  transform: translateY(-2px);
+}
+
+.mode-card.active {
+  background: linear-gradient(180deg, rgba(249, 115, 22, 0.22) 0%, rgba(30, 41, 59, 0.95) 100%);
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.35);
+  outline: none;
+}
+
+.mode-card-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.mode-card-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: block;
+}
+
+.mode-card-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: block;
+  line-height: 1.2;
+}
+
+/* Detailed Profession Mode Panel */
+.profession-detail-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.detail-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 18px;
+}
+
+.detail-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.detail-mode-icon {
+  font-size: 2.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#detail-mode-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 4px 0;
+}
+
+.detail-subtitle {
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.detail-current-risk-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-color);
+  padding: 10px 18px;
+  border-radius: 10px;
+}
+
+.current-risk-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.current-risk-score-badge {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #ffffff;
+  font-family: monospace;
+}
+
+.risk-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.current-risk-tier-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+}
+
+.section-badge-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.section-badge-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.hourly-subnote {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.hourly-timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.timeline-hour-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.timeline-hour-card:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.timeline-hour-card.peak-hour {
+  border-color: rgba(239, 68, 68, 0.6);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.hour-card-time {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hour-card-time .hour-peak-badge {
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #ef4444;
+  color: #ffffff;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hour-card-tier-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 2px 0;
+}
+
+.hour-tier-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hour-score-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: monospace;
+}
+
+.hour-card-metrics {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  color: #94a3b8;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-top: 6px;
+  margin-top: 2px;
+}
+
+.recommended-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recommendation-item-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  transition: all 0.2s ease;
+}
+
+.recommendation-item-card:hover {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.rec-arrow {
+  color: var(--accent-orange);
+  font-weight: 900;
+  font-size: 1.2rem;
+  line-height: 1.1;
+  flex-shrink: 0;
+}
+
+.rec-content {
+  flex: 1;
+}
+
+.rec-text {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.rec-citation {
+  display: block;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 3px;
+  font-style: italic;
+}
+
+.detail-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+  margin-top: 4px;
+}
+
+.footer-note {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-detail-action {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btn-detail-action:hover {
+  background: #334155;
+}
+
+
 
 

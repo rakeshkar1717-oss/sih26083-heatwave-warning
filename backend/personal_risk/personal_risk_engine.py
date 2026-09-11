@@ -121,11 +121,20 @@ def resolve_user_location(
     Tuple[str, str, float, float]
         (ward_id, ward_name, center_lat, center_lon)
     """
+    if db is None:
+        try:
+            from backend.db.session import SessionLocal
+            with SessionLocal() as local_session:
+                return resolve_user_location(ward_id=ward_id, lat=lat, lon=lon, db=local_session)
+        except Exception:
+            pass
+
     # 1. If explicit ward_id is provided, match in DB
     if ward_id and db:
         ward = db.query(WardBoundary).filter(WardBoundary.ward_id == ward_id.strip().upper()).first()
         if ward:
             return ward.ward_id, ward.ward_name, ward.center_lat, ward.center_lon
+
 
     # 2. If lat/lon are provided, perform spatial nearest match
     if lat is not None and lon is not None:

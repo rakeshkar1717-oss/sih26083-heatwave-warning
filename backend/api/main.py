@@ -51,6 +51,12 @@ from backend.personal_risk import (
     PersonalRiskResponse,
     calculate_personal_risk,
 )
+from backend.profession_modes import (
+    PROFESSION_MODES_CONFIG,
+    ProfessionModeDetail,
+    ProfessionModeResponse,
+    get_hourly_risk_forecast,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -753,6 +759,75 @@ def personal_risk_calculate_endpoint(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to calculate personal heat risk: {str(e)}",
         )
+
+
+# ==============================================================================
+# Profession Modes Endpoints (Curated Role-Specific Heat Intelligence)
+# ==============================================================================
+
+@app.get("/api/profession-modes", response_model=List[ProfessionModeDetail])
+def list_profession_modes_endpoint() -> List[ProfessionModeDetail]:
+    """Retrieve metadata and descriptors for all 6 supported profession modes."""
+    return [
+        ProfessionModeDetail(
+            mode_id=cfg["mode_id"],
+            display_name=cfg["display_name"],
+            icon=cfg["icon"],
+            subtitle=cfg["subtitle"],
+            description=cfg["description"],
+        )
+        for cfg in PROFESSION_MODES_CONFIG.values()
+    ]
+
+
+@app.get("/api/profession-mode/{mode_id}", response_model=ProfessionModeResponse)
+def get_profession_mode_risk_endpoint(
+    mode_id: str,
+    ward_id: Optional[str] = None,
+    lat: Optional[float] = None,
+    lon: Optional[float] = None,
+    location: Optional[str] = None,
+    hours_ahead: int = 5,
+    db: Session = Depends(get_db),
+) -> ProfessionModeResponse:
+    """Retrieve role-tailored real-time risk, forward hourly breakdown, and clinical advice."""
+    try:
+        target_ward = ward_id
+        target_lat = lat
+        target_lon = lon
+
+        # Support location string if passed (e.g. location="AMD_01" or location="23.038,72.552")
+        if location and not target_ward and target_lat is None:
+            if "," in location:
+                try:
+                    parts = location.split(",")
+                    target_lat = float(parts[0].strip())
+                    target_lon = float(parts[1].strip())
+                except ValueError:
+                    target_ward = location.strip()
+            else:
+                target_ward = location.strip()
+
+        return get_hourly_risk_forecast(
+            mode_id=mode_id,
+            ward_id=target_ward,
+            lat=target_lat,
+            lon=target_lon,
+            hours_ahead=hours_ahead,
+            db=db,
+        )
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(ve),
+        )
+    except Exception as e:
+        logger.error("Profession mode risk evaluation error: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to evaluate profession mode heat risk: {str(e)}",
+        )
+
 
 
 
