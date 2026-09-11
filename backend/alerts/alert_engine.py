@@ -7,14 +7,14 @@ and maintains persistent audit records in the database.
 
 import uuid
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from backend.config import settings
 from backend.models import AlertChannel, AlertResponse, RiskLevel
-from backend.db.models_orm import WardBoundary, WeatherReading, AlertLog
+from backend.db.models_orm import WardBoundary, WeatherReading, AlertLog, AlertSubscriber
 from backend.alerts.sender_base import AlertSender
 from backend.alerts.twilio_client import TwilioAlertSender
 from backend.alerts.gupshup_client import GupshupAlertSender
@@ -255,7 +255,11 @@ def check_and_trigger_alerts(
     sender: Optional[AlertSender] = None,
     target_phone: Optional[str] = None,
 ) -> List[AlertResponse]:
-    """Scan all wards and dispatch automated alerts for those exceeding danger thresholds."""
+    """Scan all wards and dispatch automated alerts for those exceeding danger thresholds.
+
+    Dispatches to configured demo recipient as well as all active, consented
+    subscribers registered in the breached ward, respecting daily safety caps.
+    """
     wards = db.query(WardBoundary).all()
     results = []
     phone = target_phone or settings.test_recipient_phone
@@ -275,17 +279,72 @@ def check_and_trigger_alerts(
         # Trigger if high or extreme risk
         if final_risk >= 0.70:
             logger.info("Ward %s breached alert threshold (Risk: %.3f). Triggering alert dispatch...", ward.ward_id, final_risk)
-            try:
-                res = send_ward_alert(
-                    ward_id=ward.ward_id,
-                    recipient_phone=phone,
-                    channel=AlertChannel.SMS,
-                    force=False,
-                    db=db,
-                    sender=sender,
+
+            # 1. Dispatch to demo/administrative recipient
+            if phone:
+                try:
+                    res = send_ward_alert(
+                        ward_id=ward.ward_id,
+                        recipient_phone=phone,
+                        channel=AlertChannel.SMS,
+                        force=False,
+                        db=db,
+                        sender=sender,
+                    )
+                    results.append(res)
+                except Exception as e:
+                    logger.error("Failed to trigger alert for ward %s to demo recipient: %s", ward.ward_id, e)
+
+            # 2. Dispatch to registered active citizens/subscribers in this ward
+            active_subscribers = (
+                db.query(AlertSubscriber)
+                .filter(
+                    AlertSubscriber.ward_id == ward.ward_id,
+                    AlertSubscriber.is_active == True,
                 )
-                results.append(res)
-            except Exception as e:
-                logger.error("Failed to trigger alert for ward %s: %s", ward.ward_id, e)
+                .all()
+            )
+
+            now_utc = datetime.now(timezone.utc)
+            one_day_ago = now_utc - timedelta(hours=24)
+
+            for sub in active_subscribers:
+                # Avoid duplicate dispatch if subscriber phone is already the demo phone
+                if sub.phone_number == phone:
+                    continue
+
+                # Enforce daily alert safety cap per subscriber
+                daily_alerts_count = (
+                    db.query(AlertLog)
+                    .filter(
+                        AlertLog.recipient_phone == sub.phone_number,
+                        AlertLog.triggered_at >= one_day_ago,
+                    )
+                    .count()
+                )
+                if daily_alerts_count >= settings.max_alerts_per_subscriber_per_day:
+                    logger.info(
+                        "Subscriber %s reached daily alert cap (%d/%d). Suppressing alert.",
+                        sub.phone_number,
+                        daily_alerts_count,
+                        settings.max_alerts_per_subscriber_per_day,
+                    )
+                    continue
+
+                chan = AlertChannel.WHATSAPP if sub.channel == "whatsapp" else AlertChannel.SMS
+                try:
+                    sub_res = send_ward_alert(
+                        ward_id=ward.ward_id,
+                        recipient_phone=sub.phone_number,
+                        channel=chan,
+                        force=True,
+                        db=db,
+                        sender=sender,
+                    )
+                    sub.last_alert_sent_at = now_utc
+                    db.commit()
+                    results.append(sub_res)
+                except Exception as e:
+                    logger.error("Failed to trigger subscriber alert for %s in ward %s: %s", sub.phone_number, ward.ward_id, e)
 
     return results

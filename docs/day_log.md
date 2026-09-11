@@ -895,4 +895,45 @@ Implement the **"Profession Modes"** interface and engine on top of the SIH26083
 - **Full Test Suite Status**: **105 passed, 0 failed (100% pass rate)** in 6.04s.
 - **Master Pipeline Verification**: `demo_full_pipeline.py` executed with all 8 core subsystems fully operational.
 
+---
+
+## [Day 18] Anonymous Phone/WhatsApp Alert Subscription & Carrier Inbound Webhook Handling
+
+### Objective
+Implement an anonymous, account-free **Phone/WhatsApp Alert Subscription** subsystem allowing any citizen or municipal visitor to enter their mobile phone number and receive automated hyper-local early warnings when their ward breaches dangerous heatwave thresholds:
+1. **Relational Persistence Layer (`/backend/db/models_orm.py`)**:
+   - `AlertSubscriber`: Stores phone number (E.164), ward ID, preferred channel (`sms` or `whatsapp`), subscription timestamp, active state, consent confirmation timestamp, and last alert sent timestamp.
+   - `ConsentLog`: Immutable audit trail recording double opt-in subscriptions, confirmation dispatches, opt-out requests, and carrier inbound STOP webhook events.
+2. **Subscriptions Subsystem (`/backend/subscriptions/`)**:
+   - `subscription_service.py`: Implements phone number normalization via `phonenumbers` library with E.164 standardization (`+91XXXXXXXXXX`), hourly rate-limiting protection (`MAX_SUBSCRIPTION_ATTEMPTS_PER_HOUR = 3`), active duplicate check, immediate confirmation text dispatch via existing Twilio/Gupshup sender, and carrier-mandated `STOP` keyword unsubscription webhook processing.
+3. **Alert Engine Integration (`/backend/alerts/alert_engine.py`)**:
+   - Extended `check_and_trigger_alerts()` to scan all registered active subscribers in breached wards, dispatching localized WHO/GHHIN advisories while enforcing daily spam prevention limits (`MAX_ALERTS_PER_SUBSCRIBER_PER_DAY = 3`).
+4. **REST API Microservices (`backend/api/main.py`)**:
+   - `POST /api/subscribe`: Validates payload, resolves GPS/ward, registers subscriber, sends confirmation.
+   - `POST /api/unsubscribe`: Unsubscribes phone number across all wards or specified ward.
+   - `POST /api/webhook/inbound-message`: Webhook handler parsing carrier form-data and JSON replies for automated `STOP` unsubscription compliance.
+5. **Frontend Landing Widget & Management Modal (`frontend/`)**:
+   - Prominent landing alert signup card directly accessible on the main dashboard view.
+   - Mobile number input (+91 prefix), ward selector with GPS fix, SMS/WhatsApp channel toggle, explicit double opt-in consent line, and live feedback banners.
+   - Manage Subscription / Unsubscribe modal for frictionless citizen opt-out.
+6. **Regulatory Compliance Documentation (`/docs/COMPLIANCE_NOTES.md`)**:
+   - Detailed review of double opt-in architecture, STOP keyword compliance, and clear documentation of Indian telecom regulatory requirements (TRAI DND registry, DLT Principal Entity/Template registration, and 140/160 series prefixes) necessary for commercial/production deployment.
+
+---
+
+### Verification and Test Results
+- **Unit & Integration Test Suite (`backend/tests/test_subscriptions.py`)**:
+  - `test_normalize_and_validate_phone_valid`: PASSED.
+  - `test_normalize_and_validate_phone_invalid`: PASSED.
+  - `test_subscribe_valid_flow`: PASSED.
+  - `test_subscribe_duplicate_rejected`: PASSED.
+  - `test_subscribe_rate_limiting`: PASSED.
+  - `test_unsubscribe_flow`: PASSED.
+  - `test_handle_stop_reply_webhook`: PASSED.
+  - `test_api_subscribe_and_webhook_endpoints`: PASSED.
+  - `test_alert_engine_dispatches_to_active_subscribers`: PASSED.
+- **Full Test Suite Status**: **114 passed, 0 failed (100% pass rate)** in 6.57s.
+- **End-to-End Sandbox Demonstration (`demo_subscription_flow.py`)**: Executed full lifecycle (Subscribe -> Confirmation text -> Hazard spike automated alert -> Inbound STOP reply webhook deactivation -> Audit log verification) with 100% success.
+
+
 

@@ -203,6 +203,8 @@ class Settings(BaseSettings):
     max_alerts_per_demo_run: int = Field(default=5, alias="MAX_ALERTS_PER_DEMO_RUN")
     alert_risk_threshold: str = Field(default="Extreme", alias="ALERT_RISK_THRESHOLD")
     test_recipient_phone: str = Field(default="+919876543210", alias="TEST_RECIPIENT_PHONE")
+    max_subscription_attempts_per_hour: int = Field(default=3, alias="MAX_SUBSCRIPTION_ATTEMPTS_PER_HOUR")
+    max_alerts_per_subscriber_per_day: int = Field(default=3, alias="MAX_ALERTS_PER_SUBSCRIBER_PER_DAY")
 
     # Application Defaults
     default_city: str = Field(default="Ahmedabad", alias="DEFAULT_CITY")

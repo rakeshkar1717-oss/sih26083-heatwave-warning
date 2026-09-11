@@ -1694,6 +1694,220 @@ function bindProfessionModes() {
 }
 
 /**
+ * Populate Ward selector in Alert Subscription Widget.
+ */
+function populateAlertSubscriptionWards() {
+  const wardSelect = document.getElementById("sub-ward-select");
+  if (!wardSelect || wardSelect.options.length > 5) return;
+
+  if (state.geojsonData && state.geojsonData.features) {
+    const wardFeatures = state.geojsonData.features.filter(
+      (f) => f.properties && f.properties.ward_id
+    );
+    if (wardFeatures.length > 0) {
+      wardSelect.innerHTML = "";
+      const sorted = [...wardFeatures].sort((a, b) =>
+        (a.properties.ward_name || "").localeCompare(b.properties.ward_name || "")
+      );
+      sorted.forEach((wf) => {
+        const opt = document.createElement("option");
+        opt.value = wf.properties.ward_id;
+        opt.textContent = `${wf.properties.ward_name} (${wf.properties.ward_id})`;
+        wardSelect.appendChild(opt);
+      });
+      if (state.selectedWardProps && state.selectedWardProps.ward_id) {
+        wardSelect.value = state.selectedWardProps.ward_id;
+      }
+    }
+  }
+}
+
+/**
+ * Bind Alert Subscription Widget and Manage Modal controls (Day 18).
+ */
+function bindAlertSubscription() {
+  const toggleBtn = document.getElementById("btn-toggle-sub-widget");
+  const widgetBody = document.getElementById("sub-widget-body");
+  const toggleIcon = document.getElementById("sub-toggle-icon");
+  const gpsBtn = document.getElementById("btn-sub-gps");
+  const gpsStatus = document.getElementById("sub-gps-status");
+  const form = document.getElementById("alert-subscription-form");
+  const phoneInput = document.getElementById("sub-phone-input");
+  const wardSelect = document.getElementById("sub-ward-select");
+  const submitBtn = document.getElementById("btn-sub-submit");
+  const feedbackBanner = document.getElementById("sub-feedback-banner");
+
+  let subLat = null;
+  let subLon = null;
+
+  // Collapse / Expand toggle
+  if (toggleBtn && widgetBody) {
+    toggleBtn.addEventListener("click", () => {
+      widgetBody.classList.toggle("collapsed");
+      if (toggleIcon) {
+        toggleIcon.textContent = widgetBody.classList.contains("collapsed") ? "▼" : "▲";
+      }
+    });
+  }
+
+  // GPS auto-detection
+  if (gpsBtn) {
+    gpsBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        if (gpsStatus) {
+          gpsStatus.textContent = "⚠️ Browser geolocation not supported.";
+          gpsStatus.style.color = "#ef4444";
+        }
+        return;
+      }
+
+      gpsBtn.textContent = "📡 GPS...";
+      if (gpsStatus) {
+        gpsStatus.textContent = "Acquiring satellite fix...";
+        gpsStatus.style.color = "#38bdf8";
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          subLat = pos.coords.latitude;
+          subLon = pos.coords.longitude;
+          gpsBtn.textContent = "📍 Active";
+          if (gpsStatus) {
+            gpsStatus.textContent = `📍 GPS Active (${subLat.toFixed(4)}°, ${subLon.toFixed(4)}°)`;
+            gpsStatus.style.color = "#22c55e";
+          }
+        },
+        (err) => {
+          console.warn("Subscription GPS error:", err);
+          gpsBtn.textContent = "📍 GPS";
+          if (gpsStatus) {
+            gpsStatus.textContent = "📍 GPS fix unavailable. Defaulting to ward selection.";
+            gpsStatus.style.color = "#94a3b8";
+          }
+        },
+        { timeout: 7000 }
+      );
+    });
+  }
+
+  // Form submission
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (feedbackBanner) {
+        feedbackBanner.style.display = "none";
+        feedbackBanner.className = "sub-feedback-banner";
+        feedbackBanner.textContent = "";
+      }
+
+      const rawPhone = phoneInput ? phoneInput.value.trim() : "";
+      if (!rawPhone) return;
+
+      const channelEl = document.querySelector('input[name="sub-channel"]:checked');
+      const channel = channelEl ? channelEl.value : "sms";
+      const wardId = wardSelect ? wardSelect.value : "AMD_01";
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>⏳ Subscribing...</span>`;
+      }
+
+      try {
+        const payload = {
+          phone_number: rawPhone,
+          ward_id: wardId,
+          lat: subLat,
+          lon: subLon,
+          channel: channel,
+        };
+
+        const res = await api.subscribeAlerts(payload);
+        if (feedbackBanner) {
+          feedbackBanner.style.display = "block";
+          feedbackBanner.className = "sub-feedback-banner success";
+          feedbackBanner.innerHTML = `
+            <strong>✅ Check your phone!</strong> A confirmation ${channel.toUpperCase()} has been sent for <strong>${res.ward_name}</strong>.
+            Reply <strong>STOP</strong> anytime to unsubscribe.
+          `;
+        }
+        if (phoneInput) phoneInput.value = "";
+      } catch (err) {
+        console.error("Alert subscription failed:", err);
+        if (feedbackBanner) {
+          feedbackBanner.style.display = "block";
+          feedbackBanner.className = "sub-feedback-banner error";
+          feedbackBanner.innerHTML = `<strong>⚠️ Subscription Failed:</strong> ${err.message}`;
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>Notify Me</span><span class="btn-arrow">&rarr;</span>`;
+        }
+      }
+    });
+  }
+
+  // Manage / Unsubscribe Modal
+  const manageModal = document.getElementById("manage-sub-modal");
+  const openManageBtn = document.getElementById("btn-open-manage-sub");
+  const closeManageBtn = document.getElementById("btn-close-manage-sub");
+  const cancelUnsubBtn = document.getElementById("btn-cancel-unsub");
+  const unsubForm = document.getElementById("unsubscribe-form");
+  const unsubPhoneInput = document.getElementById("unsub-phone-input");
+  const unsubFeedback = document.getElementById("unsub-feedback-banner");
+  const confirmUnsubBtn = document.getElementById("btn-confirm-unsub");
+
+  const openModal = () => {
+    if (manageModal) manageModal.style.display = "flex";
+    if (unsubFeedback) unsubFeedback.style.display = "none";
+  };
+  const closeModal = () => {
+    if (manageModal) manageModal.style.display = "none";
+  };
+
+  if (openManageBtn) openManageBtn.addEventListener("click", openModal);
+  if (closeManageBtn) closeManageBtn.addEventListener("click", closeModal);
+  if (cancelUnsubBtn) cancelUnsubBtn.addEventListener("click", closeModal);
+
+  if (unsubForm) {
+    unsubForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const phone = unsubPhoneInput ? unsubPhoneInput.value.trim() : "";
+      if (!phone) return;
+
+      if (confirmUnsubBtn) {
+        confirmUnsubBtn.disabled = true;
+        confirmUnsubBtn.textContent = "Processing...";
+      }
+
+      try {
+        const res = await api.unsubscribeAlerts({ phone_number: phone, ward_id: "ALL" });
+        if (unsubFeedback) {
+          unsubFeedback.style.display = "block";
+          unsubFeedback.className = "sub-feedback-banner success";
+          unsubFeedback.textContent = res.message || "Successfully unsubscribed from alerts.";
+        }
+        if (unsubPhoneInput) unsubPhoneInput.value = "";
+      } catch (err) {
+        console.error("Unsubscribe failed:", err);
+        if (unsubFeedback) {
+          unsubFeedback.style.display = "block";
+          unsubFeedback.className = "sub-feedback-banner error";
+          unsubFeedback.textContent = err.message;
+        }
+      } finally {
+        if (confirmUnsubBtn) {
+          confirmUnsubBtn.disabled = false;
+          confirmUnsubBtn.textContent = "Unsubscribe Me";
+        }
+      }
+    });
+  }
+}
+
+/**
  * Main Application Bootstrapper.
  */
 async function main() {
@@ -1703,6 +1917,7 @@ async function main() {
   bindNavTabs();
   bindPersonalHeatTwin();
   bindProfessionModes();
+  bindAlertSubscription();
   bindScopeControls();
   bindInfoModal();
   bindSourcesModal();
@@ -1712,6 +1927,7 @@ async function main() {
   await loadDashboardData();
   populateTwinWards();
   populateProfessionWards();
+  populateAlertSubscriptionWards();
   startAutoRefresh();
 }
 
@@ -1721,5 +1937,6 @@ if (document.readyState === "loading") {
 } else {
   main();
 }
+
 
 

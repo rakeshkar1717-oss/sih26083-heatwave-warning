@@ -2712,6 +2712,383 @@ header {
   background: #334155;
 }
 
+/* ==========================================================================
+   Day 18: Anonymous Alert Subscription Widget & Manage Subscription Modal
+   ========================================================================== */
+.alert-subscription-widget {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border-bottom: 1px solid rgba(249, 115, 22, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  position: relative;
+  z-index: 997;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+}
+
+.sub-widget-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sub-widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sub-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sub-bell-icon {
+  font-size: 1.5rem;
+  background: rgba(249, 115, 22, 0.15);
+  border: 1px solid rgba(249, 115, 22, 0.4);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-ring 2.5s infinite;
+}
+
+.sub-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+  letter-spacing: 0.02em;
+}
+
+.sub-subtitle {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.sub-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-manage-sub-link {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-manage-sub-link:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-toggle-sub-widget {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  color: #cbd5e1;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-toggle-sub-widget:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+.sub-widget-body {
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.sub-widget-body.collapsed {
+  display: none;
+}
+
+.sub-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sub-inputs-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1.6fr 1.2fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+@media (max-width: 1024px) {
+  .sub-inputs-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .sub-inputs-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sub-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sub-input-group label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.invisible-label {
+  visibility: hidden;
+}
+
+.phone-input-wrapper,
+.location-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #0f172a;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  height: 36px;
+}
+
+.phone-input-wrapper:focus-within,
+.location-input-wrapper:focus-within {
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.3);
+}
+
+.country-prefix {
+  background: rgba(30, 41, 59, 0.9);
+  color: #38bdf8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--border-color);
+}
+
+.sub-input {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  width: 100%;
+  outline: none;
+}
+
+.sub-input::placeholder {
+  color: #64748b;
+}
+
+.sub-select {
+  cursor: pointer;
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.btn-sub-gps {
+  background: rgba(30, 41, 59, 0.8);
+  border: none;
+  border-left: 1px solid var(--border-color);
+  color: #38bdf8;
+  padding: 0 12px;
+  height: 100%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.btn-sub-gps:hover {
+  background: #334155;
+}
+
+.channel-toggle-group {
+  display: flex;
+  background: #0f172a;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 2px;
+  height: 36px;
+}
+
+.channel-radio-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.channel-radio-label input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio-pill {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+}
+
+.channel-radio-label input[type="radio"]:checked + .radio-pill {
+  background: var(--accent-orange);
+  color: #ffffff;
+  box-shadow: 0 1px 6px rgba(249, 115, 22, 0.4);
+}
+
+.btn-sub-submit {
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  border: 1px solid #ea580c;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
+}
+
+.btn-sub-submit:hover {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  transform: translateY(-1px);
+}
+
+.btn-sub-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sub-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.sub-consent-text {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+.sub-consent-text strong {
+  color: #e2e8f0;
+}
+
+.sub-gps-status {
+  font-size: 0.72rem;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.sub-feedback-banner {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.sub-feedback-banner.success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #86efac;
+}
+
+.sub-feedback-banner.error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+/* Manage Subscriptions Modal */
+.manage-sub-dialog {
+  max-width: 440px;
+}
+
+.manage-sub-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.manage-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-danger-action {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ef4444;
+  border: 1px solid #dc2626;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btn-danger-action:hover {
+  background: #dc2626;
+}
+
+
 
 
 

@@ -142,6 +142,9 @@ $$\text{Final Risk} = 0.60 \cdot \text{Thermal Hazard Score} + 0.40 \cdot \text{
 | `/api/personal-risk/calculate` | `POST` | `PersonalRiskResponse` | Personalized real-time heat hazard score, 6-factor points breakdown & clinical guidance |
 | `/api/profession-modes` | `GET` | List of `ProfessionModeDetail` | Metadata for 6 pre-configured occupational modes |
 | `/api/profession-mode/{mode_id}` | `GET` | `ProfessionModeResponse` | Diurnal 5-hour risk timeline, peak risk hour & role-specific prevention protocols |
+| `/api/subscribe` | `POST` | `SubscribeResponse` | Anonymous citizen alert signup with double opt-in confirmation |
+| `/api/unsubscribe` | `POST` | `UnsubscribeResponse` | Unsubscribe phone number from all or specific municipal wards |
+| `/api/webhook/inbound-message` | `POST` | `InboundWebhookResponse` | Carrier inbound webhook for STOP/UNSUBSCRIBE compliance processing |
 | `/api/copilot/chat` | `POST` | `CopilotChatResponse` | Conversational personal thermal risk & dashboard guidance |
 | `/api/backtest/summary` | `GET` | Historical event metadata | Benchmark citations and peak disaster statistics |
 | `/api/backtest/timeline` | `GET` | 13-day historical trajectory | Daily historical heatwave progression (May 2010) |
@@ -256,6 +259,43 @@ A dedicated interactive interface sitting alongside the municipal ward map, enab
 |   - Runs compute_factor_breakdown() across 6 factors to generate hourly risk scores and tiers     |
 |   - Identifies peak risk hour window and generates tailored occupational prevention protocols     |
 +---------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 3.4 Anonymous Alert Subscription & Inbound Webhook Subsystem (`/backend/subscriptions`)
+
+```
++---------------------------------------------------------------------------------------------------+
+| CITIZEN SIGNUP (No Login, No Password: Phone Number + Ward / GPS + SMS / WhatsApp Channel)         |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| 1. NORMALIZATION & ABUSE PREVENTION (subscription_service.py)                                     |
+|   - Normalizes mobile number into standard E.164 (+91XXXXXXXXXX) via phonenumbers library         |
+|   - Rate Limiter enforces MAX_SUBSCRIPTION_ATTEMPTS_PER_HOUR (3 attempts / hour per phone)        |
+|   - Duplicate Check prevents duplicate active registrations for the identical ward                |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| 2. PERSISTENCE & DOUBLE OPT-IN CONFIRMATION                                                       |
+|   - Creates / reactivates record in alert_subscribers (is_active=True, consent_confirmed_at=now)  |
+|   - Dispatches immediate transactional confirmation: "You're subscribed... Reply STOP to opt out" |
+|   - Logs delivery in consent_logs table (timestamp, action="SUBSCRIBE_OPT_IN", channel)           |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                   +-------------------------------+-------------------------------+
+                   |                                                               |
+                   v                                                               v
++---------------------------------------------------+   +-------------------------------------------+
+| 3A. AUTOMATED DANGER BREACH ALERT DISPATCH        |   | 3B. CARRIER INBOUND WEBHOOK (STOP Reply)  |
+|   - alert_engine scans wards with Risk >= 0.70    |   |   - POST /api/webhook/inbound-message     |
+|   - Queries active subscribers in breached ward   |   |   - Recognizes STOP / UNSUBSCRIBE keywords|
+|   - Enforces MAX_ALERTS_PER_SUBSCRIBER_PER_DAY (3)|   |   - Sets is_active=False across all wards |
+|   - Dispatches localized WHO/GHHIN health advisory|   |   - Sends opt-out notice + logs in consent|
++---------------------------------------------------+   +-------------------------------------------+
 ```
 
 ---

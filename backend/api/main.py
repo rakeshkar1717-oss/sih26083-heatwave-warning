@@ -15,7 +15,7 @@ import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -56,6 +56,16 @@ from backend.profession_modes import (
     ProfessionModeDetail,
     ProfessionModeResponse,
     get_hourly_risk_forecast,
+)
+from backend.subscriptions import (
+    SubscribeRequest,
+    SubscribeResponse,
+    UnsubscribeRequest,
+    UnsubscribeResponse,
+    InboundWebhookResponse,
+    subscribe as subscribe_citizen,
+    unsubscribe as unsubscribe_citizen,
+    handle_stop_reply,
 )
 
 logger = logging.getLogger(__name__)
@@ -827,6 +837,148 @@ def get_profession_mode_risk_endpoint(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to evaluate profession mode heat risk: {str(e)}",
         )
+
+
+# ==============================================================================
+# Day 18: Anonymous Alert Subscription & Inbound Carrier Webhooks
+# ==============================================================================
+
+@app.post(
+    "/api/subscribe",
+    response_model=SubscribeResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Subscriptions"],
+)
+def api_subscribe(
+    payload: SubscribeRequest,
+    db: Session = Depends(get_db),
+) -> SubscribeResponse:
+    """Subscribe an anonymous citizen phone number to hyper-local heatwave alerts (double opt-in)."""
+    try:
+        return subscribe_citizen(
+            phone_number=payload.phone_number,
+            ward_id=payload.ward_id,
+            lat=payload.lat,
+            lon=payload.lon,
+            channel=payload.channel,
+            db=db,
+        )
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(ve),
+        )
+    except Exception as e:
+        logger.error("Subscription endpoint error: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Subscription failed: {str(e)}",
+        )
+
+
+@app.post(
+    "/api/unsubscribe",
+    response_model=UnsubscribeResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Subscriptions"],
+)
+def api_unsubscribe(
+    payload: UnsubscribeRequest,
+    db: Session = Depends(get_db),
+) -> UnsubscribeResponse:
+    """Unsubscribe an anonymous citizen phone number from heatwave alerts."""
+    try:
+        return unsubscribe_citizen(
+            phone_number=payload.phone_number,
+            ward_id=payload.ward_id or "ALL",
+            db=db,
+        )
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(ve),
+        )
+    except Exception as e:
+        logger.error("Unsubscribe endpoint error: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unsubscription failed: {str(e)}",
+        )
+
+
+@app.post(
+    "/api/webhook/inbound-message",
+    response_model=InboundWebhookResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Subscriptions"],
+)
+async def api_inbound_webhook(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> InboundWebhookResponse:
+    """Inbound webhook handler for carrier SMS/WhatsApp replies (Twilio / Gupshup)."""
+    try:
+        content_type = request.headers.get("content-type", "")
+        phone_number = None
+        message_body = None
+
+        raw_body = await request.body()
+        body_text = raw_body.decode("utf-8", errors="replace").strip()
+
+        # 1. Check if JSON payload (Gupshup / API test clients)
+        if "application/json" in content_type or (body_text.startswith("{") and body_text.endswith("}")):
+            try:
+                json_data = json.loads(body_text)
+                phone_number = (
+                    json_data.get("From")
+                    or json_data.get("sender")
+                    or json_data.get("phone_number")
+                    or json_data.get("phone")
+                )
+                message_body = (
+                    json_data.get("Body")
+                    or json_data.get("message")
+                    or json_data.get("text")
+                    or json_data.get("message_text")
+                )
+            except Exception:
+                pass
+
+        # 2. Form URL-encoded payload (Twilio standard webhook)
+        if not phone_number or message_body is None:
+            import urllib.parse
+            parsed_form = urllib.parse.parse_qs(body_text)
+            phone_number = (
+                parsed_form.get("From", [None])[0]
+                or parsed_form.get("sender", [None])[0]
+                or parsed_form.get("phone", [None])[0]
+            )
+            message_body = (
+                parsed_form.get("Body", [None])[0]
+                or parsed_form.get("message", [None])[0]
+                or parsed_form.get("text", [None])[0]
+            )
+
+        if not phone_number or message_body is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Inbound webhook payload missing sender phone ('From'/'sender') or message text ('Body'/'message').",
+            )
+
+        return handle_stop_reply(
+            phone_number=str(phone_number),
+            message_text=str(message_body),
+            db=db,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Inbound carrier webhook error: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process inbound carrier message: {str(e)}",
+        )
+
 
 
 

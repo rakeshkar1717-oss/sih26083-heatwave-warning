@@ -186,5 +186,36 @@ export async function getProfessionModeRisk(modeId, params = {}) {
   return handleResponse(response);
 }
 
+/**
+ * Subscribe a phone number to hyper-local heatwave alerts.
+ * POST /api/subscribe
+ */
+export async function subscribeAlerts(payload) {
+  const response = await fetch(`${BASE_URL}/api/subscribe`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+}
+
+/**
+ * Unsubscribe a phone number from heatwave alerts.
+ * POST /api/unsubscribe
+ */
+export async function unsubscribeAlerts(payload) {
+  const response = await fetch(`${BASE_URL}/api/unsubscribe`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+}
+
+
 
 

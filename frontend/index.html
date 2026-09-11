@@ -85,6 +85,92 @@
   <!-- City Emergency Heat Alert Banner -->
   <div id="alert-banner"></div>
 
+  <!-- Anonymous Alert Subscription Widget (Day 18: Always accessible on landing view) -->
+  <div id="alert-subscription-widget" class="alert-subscription-widget">
+    <div class="sub-widget-inner">
+      <div class="sub-widget-header">
+        <div class="sub-header-left">
+          <span class="sub-bell-icon">🔔</span>
+          <div>
+            <h3 class="sub-title">Get Free Heatwave Alerts For Your Area</h3>
+            <p class="sub-subtitle">Instant SMS or WhatsApp alerts when your ward breaches dangerous thermal stress levels. No account or login required.</p>
+          </div>
+        </div>
+        <div class="sub-header-right">
+          <button type="button" id="btn-open-manage-sub" class="btn-manage-sub-link">
+            🔕 Manage / Unsubscribe
+          </button>
+          <button type="button" id="btn-toggle-sub-widget" class="btn-toggle-sub-widget" title="Collapse or Expand Alert Signup">
+            <span id="sub-toggle-icon">▲</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="sub-widget-body" class="sub-widget-body">
+        <form id="alert-subscription-form" class="sub-form">
+          <div class="sub-inputs-row">
+            <!-- Mobile Number Input -->
+            <div class="sub-input-group phone-group">
+              <label for="sub-phone-input">Mobile Number</label>
+              <div class="phone-input-wrapper">
+                <span class="country-prefix">+91</span>
+                <input type="tel" id="sub-phone-input" class="sub-input" placeholder="98765 43210" required />
+              </div>
+            </div>
+
+            <!-- Area / Ward Selector -->
+            <div class="sub-input-group ward-group">
+              <label for="sub-ward-select">Your Ward / Area</label>
+              <div class="location-input-wrapper">
+                <select id="sub-ward-select" class="sub-input sub-select">
+                  <option value="AMD_01">Navrangpura (AMD_01)</option>
+                </select>
+                <button type="button" id="btn-sub-gps" class="btn-sub-gps" title="Auto-detect current GPS location">
+                  📍 GPS
+                </button>
+              </div>
+            </div>
+
+            <!-- Delivery Channel -->
+            <div class="sub-input-group channel-group">
+              <label>Delivery Channel</label>
+              <div class="channel-toggle-group">
+                <label class="channel-radio-label">
+                  <input type="radio" name="sub-channel" value="sms" checked />
+                  <span class="radio-pill">📱 SMS</span>
+                </label>
+                <label class="channel-radio-label">
+                  <input type="radio" name="sub-channel" value="whatsapp" />
+                  <span class="radio-pill">💬 WhatsApp</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="sub-input-group submit-group">
+              <label class="invisible-label">Action</label>
+              <button type="submit" id="btn-sub-submit" class="btn-sub-submit">
+                <span>Notify Me</span>
+                <span class="btn-arrow">&rarr;</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Consent Notice -->
+          <div class="sub-footer-row">
+            <span class="sub-consent-text">
+              🔒 <strong>Double Opt-In:</strong> By subscribing, you agree to receive heat safety alerts for your area. Reply <strong>STOP</strong> anytime to unsubscribe.
+            </span>
+            <span id="sub-gps-status" class="sub-gps-status"></span>
+          </div>
+
+          <!-- Live Feedback Banner (Success / Error) -->
+          <div id="sub-feedback-banner" class="sub-feedback-banner" style="display: none;"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Main View Area -->
   <div id="main-container">
     <!-- Map Canvas & Layer Controls -->
@@ -657,6 +743,35 @@
       </div>
       <div class="modal-footer">
         <button id="btn-close-sources-modal-footer" class="btn-primary">Close Sources</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unsubscribe / Manage Subscription Modal (Day 18) -->
+  <div id="manage-sub-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog manage-sub-dialog">
+      <div class="modal-header">
+        <h2>🔕 Manage Free Alert Subscription</h2>
+        <button id="btn-close-manage-sub" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-lead">
+          Enter your registered mobile number below to immediately unsubscribe from automated heatwave early warnings. No account required.
+        </p>
+        <form id="unsubscribe-form" class="manage-sub-form">
+          <div class="sub-input-group">
+            <label for="unsub-phone-input">Mobile Number</label>
+            <div class="phone-input-wrapper">
+              <span class="country-prefix">+91</span>
+              <input type="tel" id="unsub-phone-input" class="sub-input" placeholder="98765 43210" required />
+            </div>
+          </div>
+          <div id="unsub-feedback-banner" class="sub-feedback-banner" style="display: none;"></div>
+          <div class="manage-modal-actions">
+            <button type="button" id="btn-cancel-unsub" class="btn-secondary">Cancel</button>
+            <button type="submit" id="btn-confirm-unsub" class="btn-danger-action">Unsubscribe Me</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

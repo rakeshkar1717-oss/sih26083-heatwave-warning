@@ -65,6 +65,11 @@ class WardBoundary(Base):
         back_populates="ward",
         cascade="all, delete-orphan",
     )
+    subscribers: Mapped[List["AlertSubscriber"]] = relationship(
+        "AlertSubscriber",
+        back_populates="ward",
+        cascade="all, delete-orphan",
+    )
 
     def __repr__(self) -> str:
         return f"<WardBoundary(ward_id='{self.ward_id}', ward_name='{self.ward_name}', city='{self.city}')>"
@@ -197,3 +202,56 @@ class AlertLog(Base):
 
     def __repr__(self) -> str:
         return f"<AlertLog(id={self.id}, ward_id='{self.ward_id}', channel='{self.channel}', success={self.success})>"
+
+
+class AlertSubscriber(Base):
+    """Anonymous self-subscribed citizen for automated hyper-local heatwave alerts."""
+
+    __tablename__ = "alert_subscribers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    phone_number: Mapped[str] = mapped_column(String(30), index=True, nullable=False)
+    ward_id: Mapped[str] = mapped_column(
+        String(50),
+        ForeignKey("ward_boundaries.ward_id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    channel: Mapped[str] = mapped_column(String(20), default="sms", nullable=False)  # "sms" | "whatsapp"
+    subscribed_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True, nullable=False)
+    consent_confirmed_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+    last_alert_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    # Relationships
+    ward: Mapped["WardBoundary"] = relationship("WardBoundary", back_populates="subscribers")
+
+    __table_args__ = (
+        Index("idx_subscriber_phone_ward", "phone_number", "ward_id"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<AlertSubscriber(id={self.id}, phone='{self.phone_number}', ward='{self.ward_id}', active={self.is_active})>"
+
+
+class ConsentLog(Base):
+    """Audit record capturing double opt-in, confirmation messages, and opt-out actions."""
+
+    __tablename__ = "consent_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    phone_number: Mapped[str] = mapped_column(String(30), index=True, nullable=False)
+    ward_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    action: Mapped[str] = mapped_column(String(50), nullable=False)  # "SUBSCRIBE_OPT_IN", "CONFIRMATION_SENT", "UNSUBSCRIBE_OPT_OUT", "STOP_WEBHOOK"
+    channel: Mapped[str] = mapped_column(String(20), default="sms", nullable=False)
+    message_text: Mapped[str] = mapped_column(Text, nullable=False)
+    delivery_status: Mapped[str] = mapped_column(String(50), default="sent", nullable=False)
+    recorded_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), index=True, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<ConsentLog(id={self.id}, phone='{self.phone_number}', action='{self.action}', at='{self.recorded_at}')>"
+
