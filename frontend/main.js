@@ -1131,6 +1131,7 @@ function bindNavTabs() {
   const mapView = document.getElementById("main-container");
   const twinView = document.getElementById("personal-heat-twin-view");
   const professionView = document.getElementById("profession-modes-view");
+  const alertsView = document.getElementById("alerts-view");
 
   const switchTab = (tabName) => {
     tabBtns.forEach((btn) => {
@@ -1145,6 +1146,7 @@ function bindNavTabs() {
       if (mapView) mapView.style.display = "flex";
       if (twinView) twinView.style.display = "none";
       if (professionView) professionView.style.display = "none";
+      if (alertsView) alertsView.style.display = "none";
       if (state.map) {
         setTimeout(() => {
           state.map.invalidateSize();
@@ -1154,18 +1156,27 @@ function bindNavTabs() {
       if (mapView) mapView.style.display = "none";
       if (twinView) twinView.style.display = "block";
       if (professionView) professionView.style.display = "none";
+      if (alertsView) alertsView.style.display = "none";
       populateTwinWards();
     } else if (tabName === "professions-view") {
       if (mapView) mapView.style.display = "none";
       if (twinView) twinView.style.display = "none";
       if (professionView) professionView.style.display = "block";
+      if (alertsView) alertsView.style.display = "none";
       populateProfessionWards();
       loadProfessionMode(currentSelectedProfessionMode || "delivery_worker");
+    } else if (tabName === "alerts-view") {
+      if (mapView) mapView.style.display = "none";
+      if (twinView) twinView.style.display = "none";
+      if (professionView) professionView.style.display = "none";
+      if (alertsView) alertsView.style.display = "block";
+      populateAlertSubscriptionWards();
     } else if (tabName === "backtest") {
       // Toggle backtest and stay in map view
       if (mapView) mapView.style.display = "flex";
       if (twinView) twinView.style.display = "none";
       if (professionView) professionView.style.display = "none";
+      if (alertsView) alertsView.style.display = "none";
       const backtestToggleBtn = document.getElementById("btn-toggle-backtest");
       if (backtestToggleBtn) {
         backtestToggleBtn.click();
@@ -1208,6 +1219,14 @@ function bindNavTabs() {
   const returnModesBtn = document.getElementById("btn-modes-return-map");
   if (returnModesBtn) {
     returnModesBtn.addEventListener("click", () => {
+      switchTab("map-view");
+    });
+  }
+
+  // Bind return-to-map button inside alerts card
+  const returnAlertsBtn = document.getElementById("btn-alerts-return-map");
+  if (returnAlertsBtn) {
+    returnAlertsBtn.addEventListener("click", () => {
       switchTab("map-view");
     });
   }
@@ -1723,6 +1742,113 @@ function populateAlertSubscriptionWards() {
 }
 
 /**
+ * Populate Ward selector in Alert Subscriptions from loaded features.
+ */
+function populateAlertSubscriptionWards() {
+  const wardSelect = document.getElementById("sub-ward-select");
+  if (!wardSelect || wardSelect.options.length > 5) return;
+
+  if (state.geojsonData && state.geojsonData.features) {
+    const wardFeatures = state.geojsonData.features.filter(
+      (f) => f.properties && f.properties.ward_id
+    );
+    if (wardFeatures.length > 0) {
+      wardSelect.innerHTML = "";
+      // Sort alphabetically by ward_name
+      const sorted = [...wardFeatures].sort((a, b) =>
+        (a.properties.ward_name || "").localeCompare(b.properties.ward_name || "")
+      );
+      sorted.forEach((wf) => {
+        const opt = document.createElement("option");
+        opt.value = wf.properties.ward_id;
+        opt.textContent = `${wf.properties.ward_name} (${wf.properties.ward_id})`;
+        wardSelect.appendChild(opt);
+      });
+      // Select currently inspected ward if available
+      if (state.selectedWardProps && state.selectedWardProps.ward_id) {
+        wardSelect.value = state.selectedWardProps.ward_id;
+      }
+      updateAlertSimulatorPreview();
+    }
+  }
+}
+
+/**
+ * Dynamically update the Right Column Live Alert Preview & Simulator card.
+ */
+function updateAlertSimulatorPreview(res = null) {
+  const simAppName = document.getElementById("simulator-app-name");
+  const simWardName = document.getElementById("sim-ward-name");
+  const simWardId = document.getElementById("sim-ward-id");
+  const simBubble = document.getElementById("simulator-chat-bubble");
+
+  const channelRadio = document.querySelector('input[name="sub-channel"]:checked');
+  const channel = channelRadio ? channelRadio.value : "sms";
+  const wardSelect = document.getElementById("sub-ward-select");
+
+  let wardName = "Navrangpura";
+  let wardId = "AMD_01";
+  if (wardSelect && wardSelect.selectedIndex >= 0) {
+    const rawText = wardSelect.options[wardSelect.selectedIndex].text;
+    wardName = rawText.split("(")[0].trim();
+    wardId = wardSelect.value;
+  }
+
+  if (res) {
+    const channelUpper = (res.channel || channel).toUpperCase();
+    const isWhatsapp = channelUpper === "WHATSAPP";
+    if (simAppName) {
+      simAppName.textContent = isWhatsapp
+        ? "💬 WhatsApp • Heatwave Early Warning"
+        : "📱 SMS • Heatwave Emergency Alert";
+    }
+
+    let actionBtnHtml = "";
+    if (isWhatsapp && res.whatsapp_url) {
+      actionBtnHtml = `
+        <div style="margin-top: 14px; text-align: center;">
+          <a href="${res.whatsapp_url}" target="_blank" rel="noopener noreferrer" class="btn-sub-whatsapp-action" style="display: inline-flex; width: 100%; justify-content: center; padding: 10px 16px; font-size: 0.85rem;">
+            <span>💬</span> Open in WhatsApp / Dispatch Alert
+          </a>
+        </div>
+      `;
+    } else if (res.sms_url) {
+      actionBtnHtml = `
+        <div style="margin-top: 14px; text-align: center;">
+          <a href="${res.sms_url}" class="btn-sub-sms-action" style="display: inline-flex; width: 100%; justify-content: center; padding: 10px 16px; font-size: 0.85rem;">
+            <span>✉️</span> Open in SMS App
+          </a>
+        </div>
+      `;
+    }
+
+    const rawMsg = res.confirmation_text || res.message || "";
+    const formattedBubble = rawMsg
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br>")
+      .replace(/\*([^*]+)\*/g, "<strong>$1</strong>")
+      .replace(/_([^_]+)_/g, "<em>$1</em>");
+
+    if (simBubble) {
+      simBubble.innerHTML = `
+        <div>${formattedBubble}</div>
+        ${actionBtnHtml}
+      `;
+    }
+  } else {
+    const isWhatsapp = channel === "whatsapp";
+    if (simAppName) {
+      simAppName.textContent = isWhatsapp
+        ? "💬 WhatsApp • Heatwave Early Warning"
+        : "📱 SMS • Heatwave Emergency Alert";
+    }
+    if (simWardName) simWardName.textContent = wardName;
+    if (simWardId) simWardId.textContent = wardId;
+  }
+}
+
+/**
  * Bind Alert Subscription Widget and Manage Modal controls (Day 18).
  */
 function bindAlertSubscription() {
@@ -1740,7 +1866,20 @@ function bindAlertSubscription() {
   let subLat = null;
   let subLon = null;
 
-  // Collapse / Expand toggle
+  // Real-time simulator preview syncing
+  if (wardSelect) {
+    wardSelect.addEventListener("change", () => {
+      updateAlertSimulatorPreview();
+    });
+  }
+  const channelRadios = document.querySelectorAll('input[name="sub-channel"]');
+  channelRadios.forEach((r) => {
+    r.addEventListener("change", () => {
+      updateAlertSimulatorPreview();
+    });
+  });
+
+  // Collapse / Expand toggle (if legacy widget exists)
   if (toggleBtn && widgetBody) {
     toggleBtn.addEventListener("click", () => {
       widgetBody.classList.toggle("collapsed");
@@ -1823,6 +1962,10 @@ function bindAlertSubscription() {
         };
 
         const res = await api.subscribeAlerts(payload);
+
+        // Update live simulator preview card with confirmed response
+        updateAlertSimulatorPreview(res);
+
         if (feedbackBanner) {
           feedbackBanner.style.display = "block";
           feedbackBanner.className = "sub-feedback-banner success";
@@ -1932,7 +2075,7 @@ function bindAlertSubscription() {
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = `<span>Notify Me</span><span class="btn-arrow">&rarr;</span>`;
+          submitBtn.innerHTML = `<span>🔔 Subscribe for Heat Alerts</span><span class="btn-arrow">&rarr;</span>`;
         }
       }
     });

@@ -75,6 +75,11 @@
         <span class="tab-label">Profession Modes</span>
         <span class="tab-badge">New</span>
       </button>
+      <button class="nav-tab-btn" id="tab-btn-alerts" data-tab="alerts-view">
+        <span class="tab-icon">🔔</span>
+        <span class="tab-label">SMS / WhatsApp Alerts</span>
+        <span class="tab-badge" style="background: #f97316;">Live</span>
+      </button>
       <button class="nav-tab-btn" id="tab-btn-backtest" data-tab="backtest">
         <span class="tab-icon">🕒</span>
         <span class="tab-label">Backtest Mode (May 2010)</span>
@@ -84,92 +89,6 @@
 
   <!-- City Emergency Heat Alert Banner -->
   <div id="alert-banner"></div>
-
-  <!-- Anonymous Alert Subscription Widget (Day 18: Always accessible on landing view) -->
-  <div id="alert-subscription-widget" class="alert-subscription-widget">
-    <div class="sub-widget-inner">
-      <div class="sub-widget-header">
-        <div class="sub-header-left">
-          <span class="sub-bell-icon">🔔</span>
-          <div>
-            <h3 class="sub-title">Get Free Heatwave Alerts For Your Area</h3>
-            <p class="sub-subtitle">Instant SMS or WhatsApp alerts when your ward breaches dangerous thermal stress levels. No account or login required.</p>
-          </div>
-        </div>
-        <div class="sub-header-right">
-          <button type="button" id="btn-open-manage-sub" class="btn-manage-sub-link">
-            🔕 Manage / Unsubscribe
-          </button>
-          <button type="button" id="btn-toggle-sub-widget" class="btn-toggle-sub-widget" title="Collapse or Expand Alert Signup">
-            <span id="sub-toggle-icon">▲</span>
-          </button>
-        </div>
-      </div>
-
-      <div id="sub-widget-body" class="sub-widget-body">
-        <form id="alert-subscription-form" class="sub-form">
-          <div class="sub-inputs-row">
-            <!-- Mobile Number Input -->
-            <div class="sub-input-group phone-group">
-              <label for="sub-phone-input">Mobile Number</label>
-              <div class="phone-input-wrapper">
-                <span class="country-prefix">+91</span>
-                <input type="tel" id="sub-phone-input" class="sub-input" placeholder="98765 43210" required />
-              </div>
-            </div>
-
-            <!-- Area / Ward Selector -->
-            <div class="sub-input-group ward-group">
-              <label for="sub-ward-select">Your Ward / Area</label>
-              <div class="location-input-wrapper">
-                <select id="sub-ward-select" class="sub-input sub-select">
-                  <option value="AMD_01">Navrangpura (AMD_01)</option>
-                </select>
-                <button type="button" id="btn-sub-gps" class="btn-sub-gps" title="Auto-detect current GPS location">
-                  📍 GPS
-                </button>
-              </div>
-            </div>
-
-            <!-- Delivery Channel -->
-            <div class="sub-input-group channel-group">
-              <label>Delivery Channel</label>
-              <div class="channel-toggle-group">
-                <label class="channel-radio-label">
-                  <input type="radio" name="sub-channel" value="sms" checked />
-                  <span class="radio-pill">📱 SMS</span>
-                </label>
-                <label class="channel-radio-label">
-                  <input type="radio" name="sub-channel" value="whatsapp" />
-                  <span class="radio-pill">💬 WhatsApp</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="sub-input-group submit-group">
-              <label class="invisible-label">Action</label>
-              <button type="submit" id="btn-sub-submit" class="btn-sub-submit">
-                <span>Notify Me</span>
-                <span class="btn-arrow">&rarr;</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Consent Notice -->
-          <div class="sub-footer-row">
-            <span class="sub-consent-text">
-              🔒 <strong>Double Opt-In:</strong> By subscribing, you agree to receive heat safety alerts for your area. Reply <strong>STOP</strong> anytime to unsubscribe.
-            </span>
-            <span id="sub-gps-status" class="sub-gps-status"></span>
-          </div>
-
-          <!-- Live Feedback Banner (Success / Error) -->
-          <div id="sub-feedback-banner" class="sub-feedback-banner" style="display: none;"></div>
-        </form>
-      </div>
-    </div>
-  </div>
 
   <!-- Main View Area -->
   <div id="main-container">
@@ -632,6 +551,145 @@
             <button type="button" id="btn-modes-return-map" class="btn-detail-action btn-return-map" title="Switch back to municipal ward map">
               🗺️ Return to Ward Map
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMS / WhatsApp Alert Subscriptions View (Standalone Navigation Tab) -->
+  <div id="alerts-view" class="alerts-view-container" style="display: none;">
+    <div class="alerts-view-layout">
+      <!-- Left Column: Subscription Form Card -->
+      <div class="alerts-panel-card alerts-form-card">
+        <div class="alerts-card-header">
+          <div class="alerts-header-title">
+            <span class="alerts-main-icon">🔔</span>
+            <div>
+              <h2>SMS &amp; WhatsApp Alert Subscriptions</h2>
+              <p class="alerts-subtitle">Instant, anonymous heatwave early warnings delivered straight to your mobile device. Zero account or login required.</p>
+            </div>
+          </div>
+          <button type="button" id="btn-open-manage-sub" class="btn-manage-sub-link">
+            🔕 Manage / Unsubscribe
+          </button>
+        </div>
+
+        <form id="alert-subscription-form" class="alerts-dedicated-form">
+          <div class="form-section-title">1. Mobile Number &amp; Contact</div>
+          <div class="sub-input-group phone-group">
+            <label for="sub-phone-input">Mobile Number <span class="req">*</span></label>
+            <div class="phone-input-wrapper">
+              <span class="country-prefix">+91</span>
+              <input type="tel" id="sub-phone-input" class="sub-input" placeholder="98765 43210" required />
+            </div>
+            <span class="sub-field-hint">Supports Indian domestic 10-digit numbers or international E.164 formats.</span>
+          </div>
+
+          <div class="form-section-title">2. Target Municipal Ward</div>
+          <div class="sub-input-group ward-group">
+            <label for="sub-ward-select">Your Ward / Area <span class="req">*</span></label>
+            <div class="location-input-wrapper">
+              <select id="sub-ward-select" class="sub-input sub-select">
+                <option value="AMD_01">Navrangpura (AMD_01)</option>
+              </select>
+              <button type="button" id="btn-sub-gps" class="btn-sub-gps" title="Auto-detect current GPS location">
+                📍 GPS
+              </button>
+            </div>
+            <span id="sub-gps-status" class="sub-gps-status"></span>
+          </div>
+
+          <div class="form-section-title">3. Delivery Channel</div>
+          <div class="sub-input-group channel-group">
+            <label>Notification Channel <span class="req">*</span></label>
+            <div class="channel-toggle-group">
+              <label class="channel-radio-label">
+                <input type="radio" name="sub-channel" value="sms" checked />
+                <span class="radio-pill">📱 SMS Notification</span>
+              </label>
+              <label class="channel-radio-label">
+                <input type="radio" name="sub-channel" value="whatsapp" />
+                <span class="radio-pill">💬 WhatsApp Message</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="alerts-consent-box">
+            <span class="sub-consent-text">
+              🔒 <strong>Double Opt-In Protected:</strong> By subscribing, you agree to receive life-safety heat advisories for your area. Reply <strong>STOP</strong> anytime to instantly cancel.
+            </span>
+          </div>
+
+          <div class="alerts-form-actions">
+            <button type="submit" id="btn-sub-submit" class="btn-alerts-submit">
+              <span>🔔 Subscribe for Heat Alerts</span>
+              <span class="btn-arrow">&rarr;</span>
+            </button>
+            <button type="button" id="btn-alerts-return-map" class="btn-detail-action btn-return-map" title="Switch back to municipal ward map">
+              🗺️ Return to Ward Map
+            </button>
+          </div>
+
+          <!-- Live Feedback Banner (Success / Error) -->
+          <div id="sub-feedback-banner" class="sub-feedback-banner" style="display: none;"></div>
+        </form>
+      </div>
+
+      <!-- Right Column: Interactive Notification Preview & Live Simulator -->
+      <div class="alerts-panel-card alerts-preview-card">
+        <div class="alerts-card-header">
+          <div class="alerts-header-title">
+            <span class="alerts-main-icon">📲</span>
+            <div>
+              <h2>Live Alert Preview &amp; Simulator</h2>
+              <p class="alerts-subtitle">Real-time preview of the emergency notification dispatched to your mobile.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="live-simulator-body">
+          <div class="device-mockup-frame">
+            <div class="device-screen">
+              <div class="device-app-header">
+                <span class="app-dot"></span>
+                <span id="simulator-app-name">💬 WhatsApp &bull; Heatwave Early Warning</span>
+                <span class="app-time">Just Now</span>
+              </div>
+              <div class="device-bubble-container">
+                <div class="device-chat-bubble" id="simulator-chat-bubble">
+                  <strong>🚨 SIH26083: EXTREME HEATWAVE EARLY WARNING</strong><br>
+                  ━━━━━━━━━━━━━━━━━━━━━━━━━━<br>
+                  🛡️ <strong>STATUS:</strong> ✅ SUBSCRIPTION CONFIRMED<br><br>
+                  📍 <strong>Jurisdiction:</strong> <span id="sim-ward-name">Vatva</span> [<span id="sim-ward-id">AMD_17</span>]<br>
+                  ⏱️ <strong>Monitoring:</strong> Active 24/7 Real-Time<br>
+                  🔔 <strong>Tracking SID:</strong> #WA-638003-AMD17<br><br>
+                  📋 <strong>MONITORING SCOPE:</strong><br>
+                  • Real-time WBGT &amp; Human Thermal Stress Index<br>
+                  • Automated Code Red / Orange Hazard Warnings<br>
+                  • Demographic &amp; Vulnerability Cohort Advisories<br><br>
+                  💧 <strong>Immediate Preparedness Actions:</strong><br>
+                  • Maintain ORS hydration and carry water outdoors<br>
+                  • Cease strenuous labor during peak hours (11:30 AM - 4:00 PM)<br>
+                  • Nearest AMC Shelter: Community Health Centre<br><br>
+                  <em>To unsubscribe at any time, reply STOP.</em><br>
+                  ━━━━━━━━━━━━━━━━━━━━━━━━━━<br>
+                  <em>🏛️ Ahmedabad Municipal Corporation &amp; NDMA</em>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="compliance-highlights-box">
+            <h4>🛡️ Telecom Safety &amp; Regulatory Highlights</h4>
+            <div class="compliance-tags-grid">
+              <span class="comp-tag">✅ Double Opt-In Standard</span>
+              <span class="comp-tag">✅ STOP Keyword Opt-Out</span>
+              <span class="comp-tag">✅ TRAI DLT Compliant</span>
+              <span class="comp-tag">✅ Rate Limited (Max 3/hr)</span>
+              <span class="comp-tag">✅ Spam Cap (Max 3/day)</span>
+              <span class="comp-tag">✅ Emergency 108 Helpline</span>
+            </div>
           </div>
         </div>
       </div>
