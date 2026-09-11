@@ -1852,6 +1852,14 @@ function bindAlertSubscription() {
             `;
           }
 
+          const rawMsg = res.confirmation_text || res.message || "";
+          const formattedBubble = rawMsg
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\n/g, "<br>")
+            .replace(/\*([^*]+)\*/g, "<strong>$1</strong>")
+            .replace(/_([^_]+)_/g, "<em>$1</em>");
+
           feedbackBanner.innerHTML = `
             <div class="sub-result-card">
               <div class="sub-result-header">
@@ -1866,11 +1874,11 @@ function bindAlertSubscription() {
 
               <div class="sub-message-preview">
                 <div class="preview-title-row">
-                  <span class="preview-sender">${channelIcon} ${channelUpper} Notification to <strong>${res.phone_number}</strong></span>
+                  <span class="preview-sender">${channelIcon} ${channelUpper} Notification Card &bull; To: <strong>${res.phone_number}</strong></span>
                   <span class="preview-time">Just Now</span>
                 </div>
                 <div class="preview-bubble">
-                  "${res.confirmation_text || res.message}"
+                  ${formattedBubble}
                 </div>
               </div>
 
@@ -1878,7 +1886,11 @@ function bindAlertSubscription() {
 
               <div class="sub-status-explanation">
                 ${isSimulated ? `
-                  <strong>ℹ️ Why Sandbox Mode?</strong> Indian TRAI DLT regulations and Meta WhatsApp policies require commercial business credentials to push cellular broadcasts to unverified personal phones. In this SIH demonstration, your subscription is registered in the database, and alerts are simulated. <strong>Click the button above to view or send this message directly in your WhatsApp!</strong>
+                  <strong>ℹ️ How WhatsApp Delivery Works:</strong>
+                  <div style="margin-top: 4px; line-height: 1.5;">
+                    • <strong>Immediate Demo:</strong> Click the green <strong>"Open in WhatsApp / Send Alert Now"</strong> button above to launch WhatsApp with this pre-formatted alert card.<br>
+                    • <strong>Automatic Incoming Push:</strong> To have the Twilio Bot send incoming messages to your phone automatically, link your free Twilio Sandbox by sending <code>join &lt;your-code&gt;</code> to <strong>+1 415 523 8886</strong> and adding your Twilio credentials in Render.
+                  </div>
                 ` : `
                   <strong>✅ Automated Alerts Active:</strong> Live alerts will be dispatched directly to your mobile whenever extreme heat conditions are forecast.
                 `}

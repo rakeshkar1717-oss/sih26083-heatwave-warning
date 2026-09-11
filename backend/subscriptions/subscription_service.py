@@ -230,10 +230,31 @@ def subscribe(
     db.commit()
 
     # 6. Immediately send double opt-in confirmation message via existing sender
-    confirm_msg = (
-        f"You're subscribed to heat alerts for {resolved_ward_name}. "
-        "Reply STOP anytime to unsubscribe. - SIH26083 Heat Warning System"
-    )
+    if channel == SubscriptionChannel.WHATSAPP:
+        confirm_msg = (
+            f"🚨 *SIH26083: EXTREME HEATWAVE EARLY WARNING*\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"🛡️ *STATUS:* ✅ SUBSCRIPTION CONFIRMED\n\n"
+            f"📍 *Jurisdiction:* {resolved_ward_name} [{resolved_ward_id}]\n"
+            f"⏱️ *Monitoring:* Active 24/7 Real-Time\n"
+            f"🔔 *Tracking SID:* #WA-{normalized_phone[-6:]}-{resolved_ward_id}\n\n"
+            f"📋 *MONITORING SCOPE:*\n"
+            f"• Real-time WBGT & Human Thermal Stress Index\n"
+            f"• Automated Code Red / Orange Hazard Warnings\n"
+            f"• Demographic & Vulnerability Cohort Advisories\n\n"
+            f"💧 *Immediate Preparedness Actions:*\n"
+            f"• Maintain ORS hydration and carry water outdoors\n"
+            f"• Cease strenuous labor during peak hours (11:30 AM - 4:00 PM)\n"
+            f"• Nearest AMC Shelter: {resolved_ward_name} Community Health Centre\n\n"
+            f"ℹ️ _Reply *STOP* anytime to unsubscribe._\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"🏛️ _AMC & Gujarat State Disaster Management Authority_"
+        )
+    else:
+        confirm_msg = (
+            f"You're subscribed to heat alerts for {resolved_ward_name}. "
+            "Reply STOP anytime to unsubscribe. - SIH26083 Heat Warning System"
+        )
 
     if sender is None:
         if channel == SubscriptionChannel.WHATSAPP:
@@ -327,13 +348,29 @@ def unsubscribe(
 
     db.commit()
 
+    # Check if subscriber was on WhatsApp channel
+    has_whatsapp = any(s.channel == "whatsapp" for s in matching_subs)
+
     # Dispatch opt-out confirmation notice
-    unsub_msg = (
-        "You've been unsubscribed from SIH26083 Heat Warning alerts. "
-        "Reply START anytime to resubscribe."
-    )
+    if has_whatsapp:
+        unsub_msg = (
+            f"🚨 *SIH26083: ALERT UN-REGISTRATION*\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"🔕 *STATUS:* ✅ SUBSCRIPTION CANCELLED\n\n"
+            f"📍 *Action:* Automated emergency heat alerts deactivated for {normalized_phone}.\n"
+            f"⏱️ *Effective:* Immediate\n\n"
+            f"ℹ️ _To resubscribe at any time, visit the portal or reply *START*._\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"🏛️ _AMC & Gujarat State Disaster Management Authority_"
+        )
+    else:
+        unsub_msg = (
+            "You've been unsubscribed from SIH26083 Heat Warning alerts. "
+            "Reply START anytime to resubscribe."
+        )
+
     if sender is None:
-        sender = TwilioAlertSender(is_whatsapp=False)
+        sender = TwilioAlertSender(is_whatsapp=has_whatsapp)
 
     try:
         dispatch_result = sender.send(to=normalized_phone, message=unsub_msg)

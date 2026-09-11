@@ -3176,11 +3176,22 @@ header {
   background: #1e293b;
   border-left: 3px solid #22c55e;
   border-radius: 4px 8px 8px 4px;
-  padding: 6px 10px;
+  padding: 10px 14px;
   color: #f1f5f9;
-  font-size: 0.78rem;
-  line-height: 1.4;
-  font-style: italic;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  word-break: break-word;
+}
+
+.preview-bubble strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.preview-bubble em {
+  color: #94a3b8;
+  font-style: normal;
 }
 
 .sub-action-row {

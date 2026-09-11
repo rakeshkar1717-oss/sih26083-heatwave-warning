@@ -44,11 +44,70 @@ def compose_public_health_advisory(
     temp_c: Optional[float] = None,
     wbgt_c: Optional[float] = None,
     dominant_action_info: Optional[str] = None,
+    is_whatsapp: bool = False,
 ) -> str:
     """Compose public health heat advisory conforming to WHO/GHHIN standards, enriched with cohort action (Part E)."""
     temp_info = f" (Observed: {temp_c:.1f}°C, WBGT: {wbgt_c:.1f}°C)" if temp_c and wbgt_c else ""
     action_suffix = f" Priority Action: {dominant_action_info}" if dominant_action_info else ""
 
+    if is_whatsapp:
+        level_header = {
+            RiskLevel.EXTREME: "🚨 *CRITICAL HEAT EMERGENCY (CODE RED)*",
+            RiskLevel.VERY_HIGH: "⚠️ *SEVERE HEAT ADVISORY (CODE ORANGE)*",
+            RiskLevel.HIGH: "⚠️ *HEAT ALERT (CODE YELLOW)*",
+            RiskLevel.MODERATE: "⚡ *HEAT CAUTION (CODE AMBER)*",
+            RiskLevel.LOW: "✅ *NORMAL BASELINE CONDITIONS*",
+        }.get(risk_level, f"⚠️ *HEAT ADVISORY: {risk_level.value}*")
+
+        temp_str = f"🌡️ *Ambient Temp:* {temp_c:.1f}°C | *WBGT:* {wbgt_c:.1f}°C\n" if temp_c and wbgt_c else ""
+        action_block = f"🎯 *Priority Cohort Directive:*\n• {dominant_action_info}\n\n" if dominant_action_info else ""
+
+        if risk_level == RiskLevel.EXTREME:
+            guidelines = (
+                "• Severe risk of life-threatening heatstroke!\n"
+                "• Cease all outdoor physical labor immediately\n"
+                "• Move to shaded or air-cooled municipal shelters\n"
+                "• Drink water with ORS/electrolytes every 20 minutes\n"
+                "• Vulnerable elderly and children must report to cooling shelters"
+            )
+        elif risk_level == RiskLevel.VERY_HIGH:
+            guidelines = (
+                "• High danger of heat exhaustion\n"
+                "• Avoid direct sun and heavy outdoor labor between 11:00 AM - 4:30 PM\n"
+                "• Maintain constant hydration and utilize shaded rest points\n"
+                "• Watch for dizziness or rapid pulse"
+            )
+        elif risk_level == RiskLevel.HIGH:
+            guidelines = (
+                "• High thermal stress on human physiology\n"
+                "• Hydrate frequently, wear light breathable clothing\n"
+                "• Check on elderly neighbors and outdoor workers"
+            )
+        elif risk_level == RiskLevel.MODERATE:
+            guidelines = (
+                "• Moderate heat conditions\n"
+                "• Outdoor workers should take periodic shaded breaks\n"
+                "• Drink adequate fluids throughout the day"
+            )
+        else:
+            guidelines = "• Baseline municipal heat preparedness active."
+
+        return (
+            f"{level_header}\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📍 *Jurisdiction:* {ward_name} [{ward_id}]\n"
+            f"{temp_str}"
+            f"⏱️ *Issued:* Active Immediate\n\n"
+            f"📋 *ACTION DIRECTIVES:*\n"
+            f"{guidelines}\n\n"
+            f"{action_block}"
+            f"📞 *Emergency Helpline:* 108\n"
+            f"ℹ️ _Reply *STOP* to unsubscribe._\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"🏛️ _Ahmedabad Municipal Corporation (AMC) & NDMA_"
+        )
+
+    # Standard SMS text format
     if risk_level == RiskLevel.EXTREME:
         msg = (
             f"🚨 CRITICAL HEAT EMERGENCY for {ward_name} [{ward_id}]{temp_info}: "
@@ -210,6 +269,7 @@ def send_ward_alert(
         temp_c=temp_c,
         wbgt_c=wbgt_c,
         dominant_action_info=dominant_action_info,
+        is_whatsapp=(channel == AlertChannel.WHATSAPP),
     )
 
     # 5. Resolve Notification Sender Gateway
