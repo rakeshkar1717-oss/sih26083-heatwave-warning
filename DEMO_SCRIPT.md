@@ -59,9 +59,30 @@
 
 ---
 
-### Phase 4: THE CLINCHER — Live Historical Backtesting (Minute 3:00 - 4:00)
+### Phase 3B: Interactive "Personal Heat Twin" Live Demo (Minute 3:00 - 3:45)
+> **Speaker Action**: Click the top-level navigation tab: **"👤 Personal Heat Twin"**.
+> The standalone interactive two-column view opens cleanly on the projector.
+> The presenter enters live details in front of the judges:
+> 1. Select Age: **Senior Citizen (Age 60+)**
+> 2. Select Occupation: **Outdoor & Informal Labor**
+> 3. Select Activity: **Heavy Physical Labor**
+> 4. Slide duration to **90 minutes**
+> 5. Click: **"⚡ Check My Real-Time Heat Risk"**.
+> Show the instant result card: Large risk score gauge (e.g. **76 / 100 HIGH RISK**), the 6-factor point contribution breakdown (Air Temp, Humidity, Solar Radiant Load, Physical Exertion, Duration, Personal Factors), clinical consequence advisory, and the green **Safer Diurnal Time Window** recommendation.
+
+* **Speaker Script**:
+  > *"Civic heat dashboards often fail because they are too abstract for everyday people. A street vendor or an elderly resident doesn't just want a municipal color code—they need to know what today's heat means for **their** body.
+  > 
+  > That is why we built the **Personal Heat Twin**. Live on screen, any visitor enters their age, occupation, current activity, and exposure duration. In milliseconds, our engine couples the ward's Liljegren WBGT with ISO 8996 metabolic heat production and clinical vulnerability.
+  > 
+  > Notice the transparent point breakdown: Rather than an opaque black-box AI score, the system reveals exactly how much risk is driven by solar radiation (+12 pts), physical exertion (+20 pts), and duration (+8 pts). It provides actionable clinical advice and tells the citizen exactly what safer time window to reschedule their trip."*
+
+---
+
+### Phase 4: THE CLINCHER — Live Historical Backtesting (Minute 3:45 - 4:30)
 > **Speaker Action**: Click the glowing button: **"🕒 Backtest Mode (May 2010)"**.
 > Point to the map instantly turning red/purple, the top emergency banner updating, and the sidebar chart switching to the May 15–27, 2010 trajectory.
+
 
 * **Speaker Script**:
   > *"Now, the question every evaluator should ask: **Does your system actually work in real life?***

@@ -1124,12 +1124,346 @@ function bindHeatCopilot() {
 }
 
 /**
+ * Tab Navigation Controller (Ward Map | Personal Heat Twin | Backtest Mode).
+ */
+function bindNavTabs() {
+  const tabBtns = document.querySelectorAll(".nav-tab-btn");
+  const mapView = document.getElementById("main-container");
+  const twinView = document.getElementById("personal-heat-twin-view");
+
+  const switchTab = (tabName) => {
+    tabBtns.forEach((btn) => {
+      if (btn.getAttribute("data-tab") === tabName) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+
+    if (tabName === "map-view") {
+      if (mapView) mapView.style.display = "flex";
+      if (twinView) twinView.style.display = "none";
+      if (state.map) {
+        setTimeout(() => {
+          state.map.invalidateSize();
+        }, 100);
+      }
+    } else if (tabName === "heat-twin-view") {
+      if (mapView) mapView.style.display = "none";
+      if (twinView) twinView.style.display = "block";
+      populateTwinWards();
+    } else if (tabName === "backtest") {
+      // Toggle backtest and stay in map view
+      if (mapView) mapView.style.display = "flex";
+      if (twinView) twinView.style.display = "none";
+      const backtestToggleBtn = document.getElementById("btn-toggle-backtest");
+      if (backtestToggleBtn) {
+        backtestToggleBtn.click();
+      }
+      // Re-highlight the map-view tab if backtest toggled
+      const mapBtn = document.getElementById("tab-btn-map");
+      if (mapBtn) mapBtn.classList.add("active");
+      const backtestNavBtn = document.getElementById("tab-btn-backtest");
+      if (backtestNavBtn) {
+        if (state.isBacktestMode) {
+          backtestNavBtn.classList.add("active");
+        } else {
+          backtestNavBtn.classList.remove("active");
+        }
+      }
+      if (state.map) {
+        setTimeout(() => {
+          state.map.invalidateSize();
+        }, 100);
+      }
+    }
+  };
+
+  tabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetTab = btn.getAttribute("data-tab");
+      switchTab(targetTab);
+    });
+  });
+
+  // Also bind return-to-map button inside results card
+  const returnBtn = document.getElementById("btn-back-to-map");
+  if (returnBtn) {
+    returnBtn.addEventListener("click", () => {
+      switchTab("map-view");
+    });
+  }
+}
+
+/**
+ * Populate Ward selector in Personal Heat Twin from loaded features.
+ */
+function populateTwinWards() {
+  const wardSelect = document.getElementById("twin-ward-select");
+  if (!wardSelect || wardSelect.options.length > 5) return;
+
+  if (state.geojsonData && state.geojsonData.features) {
+    const wardFeatures = state.geojsonData.features.filter(
+      (f) => f.properties && f.properties.ward_id
+    );
+    if (wardFeatures.length > 0) {
+      wardSelect.innerHTML = "";
+      // Sort alphabetically by ward_name
+      const sorted = [...wardFeatures].sort((a, b) =>
+        (a.properties.ward_name || "").localeCompare(b.properties.ward_name || "")
+      );
+      sorted.forEach((wf) => {
+        const opt = document.createElement("option");
+        opt.value = wf.properties.ward_id;
+        opt.textContent = `${wf.properties.ward_name} (${wf.properties.ward_id})`;
+        wardSelect.appendChild(opt);
+      });
+      // Select currently inspected ward if available
+      if (state.selectedWardProps && state.selectedWardProps.ward_id) {
+        wardSelect.value = state.selectedWardProps.ward_id;
+      }
+    }
+  }
+}
+
+/**
+ * Personal Heat Twin Component & Form Controller.
+ */
+function bindPersonalHeatTwin() {
+  const form = document.getElementById("heat-twin-form");
+  const durationSlider = document.getElementById("twin-duration-slider");
+  const durationBadge = document.getElementById("twin-duration-badge");
+  const gpsBtn = document.getElementById("btn-twin-gps");
+  const locationFeedback = document.getElementById("twin-location-feedback");
+  const formError = document.getElementById("twin-form-error");
+  const wardSelect = document.getElementById("twin-ward-select");
+  const submitBtn = document.getElementById("btn-twin-submit");
+
+  let detectedLat = null;
+  let detectedLon = null;
+
+  // Live duration slider feedback
+  if (durationSlider && durationBadge) {
+    durationSlider.addEventListener("input", () => {
+      const val = parseInt(durationSlider.value, 10);
+      const hours = (val / 60).toFixed(1);
+      durationBadge.textContent = `${val} minutes (${hours} hrs)`;
+    });
+  }
+
+  // GPS auto-detection handler
+  if (gpsBtn && locationFeedback) {
+    gpsBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        locationFeedback.textContent = "⚠️ Browser geolocation not supported. Please select ward manually.";
+        locationFeedback.style.color = "#ef4444";
+        return;
+      }
+
+      locationFeedback.textContent = "📡 Acquiring GPS satellite fix...";
+      locationFeedback.style.color = "#38bdf8";
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          detectedLat = pos.coords.latitude;
+          detectedLon = pos.coords.longitude;
+          locationFeedback.textContent = `📍 GPS active (${detectedLat.toFixed(4)}°, ${detectedLon.toFixed(4)}°). Resolving nearest ward...`;
+          locationFeedback.style.color = "#22c55e";
+        },
+        (err) => {
+          console.warn("Geolocation query error:", err);
+          locationFeedback.textContent = "📍 Geolocation denied or unavailable. Defaulting to municipal ward.";
+          locationFeedback.style.color = "#94a3b8";
+        },
+        { timeout: 8000 }
+      );
+    });
+  }
+
+  // Print / Screenshot trigger
+  const printBtn = document.getElementById("btn-print-twin");
+  if (printBtn) {
+    printBtn.addEventListener("click", () => {
+      window.print();
+    });
+  }
+
+  // Form submission & calculation pipeline
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (formError) {
+        formError.style.display = "none";
+        formError.textContent = "";
+      }
+
+      const ageGroup = document.getElementById("twin-age-group").value;
+      const occupation = document.getElementById("twin-occupation").value;
+      const activity = document.getElementById("twin-activity").value;
+      const duration = parseInt(durationSlider ? durationSlider.value : 60, 10);
+      const wardId = wardSelect ? wardSelect.value : "AMD_01";
+
+      if (isNaN(duration) || duration <= 0) {
+        if (formError) {
+          formError.style.display = "block";
+          formError.textContent = "⚠️ Please specify a valid continuous outdoor exposure duration (> 0 min).";
+        }
+        return;
+      }
+
+      // Show loading indicator in button
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>⏳ Evaluating Thermal Stress Model...</span>`;
+      }
+
+      try {
+        const payload = {
+          age_group: ageGroup,
+          occupation: occupation,
+          current_activity: activity,
+          outdoor_duration_minutes: duration,
+          ward_id: wardId,
+          lat: detectedLat,
+          lon: detectedLon,
+        };
+
+        const result = await api.calculatePersonalRisk(payload);
+        renderPersonalRiskResults(result, payload);
+      } catch (err) {
+        console.error("Personal risk calculation failed:", err);
+        if (formError) {
+          formError.style.display = "block";
+          formError.textContent = `⚠️ Calculation failed: ${err.message}. Please check connection to backend.`;
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span class="btn-icon">⚡</span><span>Check My Real-Time Heat Risk</span>`;
+        }
+      }
+    });
+  }
+}
+
+/**
+ * Render Personal Heat Twin Results Card matching reference design.
+ */
+function renderPersonalRiskResults(result, requestPayload) {
+  const placeholder = document.getElementById("results-placeholder");
+  const content = document.getElementById("results-content");
+  if (!content) return;
+
+  if (placeholder) placeholder.style.display = "none";
+  content.style.display = "flex";
+
+  // 1. Header & Location Tag
+  const wardTag = document.getElementById("result-ward-tag");
+  if (wardTag) {
+    wardTag.textContent = `${result.ward_name} [${result.ward_id}]`;
+  }
+
+  // 2. Profile Chips
+  const chipsContainer = document.getElementById("result-profile-chips");
+  if (chipsContainer) {
+    chipsContainer.innerHTML = "";
+    const chips = [
+      `👤 Age: ${requestPayload.age_group}`,
+      `💼 ${requestPayload.occupation.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+      `⚡ ${requestPayload.current_activity.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+      `⏱️ ${requestPayload.outdoor_duration_minutes} mins`,
+    ];
+    chips.forEach((c) => {
+      const chipEl = document.createElement("span");
+      chipEl.className = "profile-chip";
+      chipEl.textContent = c;
+      chipsContainer.appendChild(chipEl);
+    });
+  }
+
+  // 3. Score Circle & Tier Badge
+  const scoreNum = document.getElementById("result-score-num");
+  const scoreCircle = document.getElementById("result-score-circle");
+  const tierBadge = document.getElementById("result-tier-badge");
+
+  if (scoreNum) scoreNum.textContent = Math.round(result.personal_risk_score);
+  if (scoreCircle) {
+    scoreCircle.style.borderColor = result.risk_color;
+    scoreCircle.style.boxShadow = `0 0 20px ${result.risk_color}55`;
+  }
+  if (tierBadge) {
+    tierBadge.textContent = `${result.risk_tier.replace(/_/g, " ")} RISK`;
+    tierBadge.style.backgroundColor = result.risk_color;
+  }
+
+  // 4. Weather Live Ribbon
+  const wc = result.current_conditions || {};
+  const tEl = document.getElementById("result-temp");
+  const hEl = document.getElementById("result-humidity");
+  const wbgtEl = document.getElementById("result-wbgt");
+  const hiEl = document.getElementById("result-hi");
+  const utciEl = document.getElementById("result-utci");
+
+  if (tEl) tEl.textContent = wc.temp_c != null ? `${wc.temp_c}°C` : "--";
+  if (hEl) hEl.textContent = wc.humidity_pct != null ? `${wc.humidity_pct}%` : "--";
+  if (wbgtEl) wbgtEl.textContent = wc.wbgt_c != null ? `${wc.wbgt_c}°C` : "--";
+  if (hiEl) hiEl.textContent = wc.heat_index_c != null ? `${wc.heat_index_c}°C` : "--";
+  if (utciEl) utciEl.textContent = wc.utci_c != null ? `${wc.utci_c}°C` : "--";
+
+  // 5. Factor Breakdown List
+  const factorList = document.getElementById("result-factor-list");
+  if (factorList && result.factor_breakdown) {
+    factorList.innerHTML = "";
+    result.factor_breakdown.forEach((item) => {
+      const pct = Math.min(100, Math.round((item.point_contribution / item.max_points) * 100));
+      const row = document.createElement("div");
+      row.className = "factor-row";
+      row.innerHTML = `
+        <div class="factor-row-header">
+          <div class="factor-row-left">
+            <span class="factor-icon">${item.icon || "⚡"}</span>
+            <span class="factor-title">${item.factor_name}</span>
+          </div>
+          <span class="factor-points-badge">+${item.point_contribution} pts</span>
+        </div>
+        <div class="factor-bar-track">
+          <div class="factor-bar-fill" style="width: ${pct}%"></div>
+        </div>
+        <p class="factor-desc">${item.description}</p>
+      `;
+      factorList.appendChild(row);
+    });
+  }
+
+  // 6. Better Time Window Banner
+  const timeBanner = document.getElementById("result-better-time-banner");
+  const timeText = document.getElementById("result-better-time-text");
+  if (timeBanner && timeText) {
+    if (result.suggested_better_time) {
+      timeBanner.style.display = "flex";
+      timeText.textContent = result.suggested_better_time;
+    } else {
+      timeBanner.style.display = "none";
+    }
+  }
+
+  // 7. Clinical Consequence & Action
+  const consText = document.getElementById("result-consequence-text");
+  const actText = document.getElementById("result-action-text");
+  if (consText) consText.textContent = result.consequence_text;
+  if (actText) actText.textContent = result.recommendation_text;
+}
+
+/**
  * Main Application Bootstrapper.
  */
 async function main() {
   initMap();
   bindLayerControls();
   bindBacktestToggle();
+  bindNavTabs();
+  bindPersonalHeatTwin();
   bindScopeControls();
   bindInfoModal();
   bindSourcesModal();
@@ -1137,6 +1471,7 @@ async function main() {
   bindHeatCopilot();
   await updateSystemStatus();
   await loadDashboardData();
+  populateTwinWards();
   startAutoRefresh();
 }
 
@@ -1146,3 +1481,4 @@ if (document.readyState === "loading") {
 } else {
   main();
 }
+

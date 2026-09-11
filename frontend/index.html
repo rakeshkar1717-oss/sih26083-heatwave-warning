@@ -59,6 +59,25 @@
     </div>
   </header>
 
+  <!-- Top Navigation Tab Bar -->
+  <div class="top-nav-bar">
+    <div class="top-nav-tabs">
+      <button class="nav-tab-btn active" id="tab-btn-map" data-tab="map-view">
+        <span class="tab-icon">🗺️</span>
+        <span class="tab-label">Ward Map View</span>
+      </button>
+      <button class="nav-tab-btn" id="tab-btn-twin" data-tab="heat-twin-view">
+        <span class="tab-icon">👤</span>
+        <span class="tab-label">Personal Heat Twin</span>
+        <span class="tab-badge">New</span>
+      </button>
+      <button class="nav-tab-btn" id="tab-btn-backtest" data-tab="backtest">
+        <span class="tab-icon">🕒</span>
+        <span class="tab-label">Backtest Mode (May 2010)</span>
+      </button>
+    </div>
+  </div>
+
   <!-- City Emergency Heat Alert Banner -->
   <div id="alert-banner"></div>
 
@@ -200,6 +219,199 @@
           </svg>
           Dispatch Early Warning Alert
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standalone Personal Heat Twin View -->
+  <div id="personal-heat-twin-view" class="heat-twin-container" style="display: none;">
+    <div class="heat-twin-layout">
+      <!-- Left Column: User Input Form -->
+      <div class="heat-twin-card heat-twin-form-card">
+        <div class="twin-card-header">
+          <div class="twin-header-title">
+            <span class="twin-icon">🧬</span>
+            <div>
+              <h2>Personal Heat Twin</h2>
+              <p class="twin-subtitle">Tell us about yourself to receive your personalized real-time heat hazard score, clinical risk breakdown, and prevention steps.</p>
+            </div>
+          </div>
+        </div>
+
+        <form id="heat-twin-form" novalidate>
+          <div class="form-section-title">1. Your Profile & Demographics</div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="twin-age-group">Age Group <span class="req">*</span></label>
+              <select id="twin-age-group" class="twin-select" required>
+                <option value="18-30">Young Adult (Age 18–30)</option>
+                <option value="31-45">Adult (Age 31–45)</option>
+                <option value="46-59">Middle Age (Age 46–59)</option>
+                <option value="60+" selected>Senior Citizen (Age 60+) ⚠️</option>
+                <option value="0-17">Child / Youth (Age 0–17)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="twin-occupation">Occupation / Work Environment <span class="req">*</span></label>
+              <select id="twin-occupation" class="twin-select" required>
+                <option value="outdoor_worker" selected>Outdoor / Informal Labor (Vendor, Construction)</option>
+                <option value="indoor_worker">Indoor / Office Worker (Formal Sector)</option>
+                <option value="student">Student / Academic</option>
+                <option value="elderly_nonworking">Elderly Non-Working / Homebound</option>
+                <option value="other">Other / Commuter</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-section-title">2. Activity & Outdoor Exposure</div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="twin-activity">Current / Planned Activity <span class="req">*</span></label>
+              <select id="twin-activity" class="twin-select" required>
+                <option value="heavy_labor" selected>Heavy Physical Labor (Manual work, construction) — ~300+ W</option>
+                <option value="moderate_exercise">Moderate Exercise / Cycling / Sports — ~230 W</option>
+                <option value="walking">Walking / Outdoor Errands / Transit — ~165 W</option>
+                <option value="resting">Resting / Standing in Shade — ~100 W</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <div class="duration-label-row">
+                <label for="twin-duration-slider">Continuous Outdoor Duration <span class="req">*</span></label>
+                <span id="twin-duration-badge" class="duration-badge">90 minutes (1.5 hrs)</span>
+              </div>
+              <input type="range" id="twin-duration-slider" min="5" max="360" step="5" value="90" class="twin-slider" />
+              <div class="slider-marks">
+                <span>15m</span>
+                <span>1 hr</span>
+                <span>2 hrs</span>
+                <span>4 hrs</span>
+                <span>6 hrs</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section-title">3. Exposure Location</div>
+          <div class="form-group">
+            <label for="twin-ward-select">Municipal Ward / Neighborhood</label>
+            <div class="location-input-group">
+              <select id="twin-ward-select" class="twin-select">
+                <option value="AMD_01">Navrangpura (AMD_01)</option>
+              </select>
+              <button type="button" id="btn-twin-gps" class="btn-twin-gps" title="Detect your current location via browser GPS">
+                <span class="gps-icon">📍</span> Use My GPS
+              </button>
+            </div>
+            <div id="twin-location-feedback" class="twin-feedback-text">Using selected ward live weather stream.</div>
+          </div>
+
+          <div id="twin-form-error" class="form-error-alert" style="display: none;"></div>
+
+          <button type="submit" id="btn-twin-submit" class="btn-twin-submit">
+            <span class="btn-icon">⚡</span>
+            <span>Check My Real-Time Heat Risk</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: Personal Heat Risk Results Card -->
+      <div class="heat-twin-card heat-twin-results-card" id="heat-twin-results">
+        <div class="results-placeholder" id="results-placeholder">
+          <div class="placeholder-icon">🛡️</div>
+          <h3>Your Heat Twin is Ready</h3>
+          <p>Fill out your profile on the left and click <strong>"Check My Real-Time Heat Risk"</strong> to compute your personalized risk score, factor breakdown, and clinical safety protocol.</p>
+        </div>
+
+        <div class="results-content" id="results-content" style="display: none;">
+          <!-- Top Result Header -->
+          <div class="result-header-row">
+            <div class="result-title-block">
+              <span class="result-location-tag" id="result-ward-tag">Navrangpura (AMD_01)</span>
+              <h3>Personal Heat Risk Assessment</h3>
+              <div class="result-profile-chips" id="result-profile-chips">
+                <!-- Profile chips populated dynamically -->
+              </div>
+            </div>
+            <div class="result-score-block">
+              <div class="score-circle" id="result-score-circle">
+                <span class="score-num" id="result-score-num">--</span>
+                <span class="score-den">/100</span>
+              </div>
+              <span class="result-tier-badge" id="result-tier-badge">--</span>
+            </div>
+          </div>
+
+          <!-- Meteorological Live Ribbon -->
+          <div class="weather-ribbon" id="result-weather-ribbon">
+            <div class="ribbon-item">
+              <span class="ribbon-label">Air Temp</span>
+              <span class="ribbon-val" id="result-temp">--°C</span>
+            </div>
+            <div class="ribbon-item">
+              <span class="ribbon-label">Humidity</span>
+              <span class="ribbon-val" id="result-humidity">--%</span>
+            </div>
+            <div class="ribbon-item">
+              <span class="ribbon-label">WBGT (Outdoor)</span>
+              <span class="ribbon-val" id="result-wbgt">--°C</span>
+            </div>
+            <div class="ribbon-item">
+              <span class="ribbon-label">Heat Index</span>
+              <span class="ribbon-val" id="result-hi">--°C</span>
+            </div>
+            <div class="ribbon-item">
+              <span class="ribbon-label">UTCI Bioclimate</span>
+              <span class="ribbon-val" id="result-utci">--°C</span>
+            </div>
+          </div>
+
+          <!-- Factor Point-Contribution Breakdown (Distinctive Visual Design) -->
+          <div class="factor-breakdown-section">
+            <h4>🔬 Multi-Factor Point Contribution Breakdown</h4>
+            <p class="breakdown-subtitle">Points dynamically weighted from biometeorological indices (ISO 7243 WBGT, NOAA Heat Index) and clinical vulnerability models:</p>
+            <div class="factor-list" id="result-factor-list">
+              <!-- Dynamically populated factor rows -->
+            </div>
+          </div>
+
+          <!-- Safer Diurnal Window Banner -->
+          <div class="better-time-banner" id="result-better-time-banner">
+            <span class="banner-icon">🌅</span>
+            <div class="banner-body">
+              <strong>Safer Diurnal Time Window:</strong>
+              <span id="result-better-time-text">--</span>
+            </div>
+          </div>
+
+          <!-- Epidemiological Consequence & Prevention Recommendations -->
+          <div class="clinical-guidance-card">
+            <div class="guidance-block consequence-block">
+              <div class="guidance-title">
+                <span>⚠️</span>
+                <strong>Clinical & Physiological Health Consequence:</strong>
+              </div>
+              <p id="result-consequence-text">--</p>
+            </div>
+            <div class="guidance-block action-block">
+              <div class="guidance-title">
+                <span>🛡️</span>
+                <strong>Immediate Preventive Medical Action:</strong>
+              </div>
+              <p id="result-action-text">--</p>
+            </div>
+          </div>
+
+          <!-- Results Footer Actions -->
+          <div class="result-actions-footer">
+            <button type="button" id="btn-print-twin" class="btn-result-action" title="Print or save screenshot for presentation">
+              📸 Print / Save Profile
+            </button>
+            <button type="button" id="btn-back-to-map" class="btn-result-action btn-return-map" title="Switch back to municipal ward choropleth view">
+              🗺️ Return to Ward Map
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

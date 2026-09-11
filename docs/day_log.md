@@ -758,3 +758,74 @@ Complete Day 12/15 milestone requirements:
 - **Heat Copilot Tests (`backend/tests/test_copilot.py`)**: 9 tests verifying intent routing, personal risk entity extraction, missing ward prompt, science Q&A, UI help, and API endpoints.
 - **Full Test Suite Status**: **90 passed, 0 failed (100% pass rate)**.
 - **Master Pipeline Verification**: `demo_full_pipeline.py` executed with all 8 core subsystems operational.
+
+---
+
+## [Day 16] Standalone "Personal Heat Twin" Interactive Risk Engine & Dashboard Tab
+
+### Objective
+Implement a standalone, interactive **"Personal Heat Twin"** feature sitting alongside the municipal ward map as a primary dashboard tab:
+1. **Backend Personal Risk Calculation Engine (`/backend/personal_risk`)**: Develop a rigorous, scientifically grounded 0–100 point-contribution algorithm evaluating biometeorological hazard, metabolic physical exertion, continuous exposure duration, and demographic vulnerability.
+2. **REST API Microservice (`POST /api/personal-risk/calculate`)**: Return composite personal risk score, risk tier, factor-by-factor point breakdown, epidemiological consequence advisory, preventive recommendations, and safer diurnal time windows.
+3. **Frontend Standalone Tab & Card Interface**: Build top-level tab navigation (`Ward Map View` | `Personal Heat Twin` | `Backtest Mode`), interactive input form (age, occupation, activity, duration slider, GPS/ward selection), and high-contrast presentation results card matching the reference design.
+4. **Demonstration Script Enhancement (`DEMO_SCRIPT.md`)**: Add live demonstration moment (Phase 3B) for presenting personalized heat risk live before hackathon judges.
+
+---
+
+### Technical Implementation
+
+#### 1. Backend Personal Risk Engine (`backend/personal_risk/`)
+- **Schemas (`personal_risk_schema.py`)**:
+  - `AgeGroup`: Enum `"0-17"`, `"18-30"`, `"31-45"`, `"46-59"`, `"60+"`.
+  - `OccupationType`: Enum `"student"`, `"outdoor_worker"`, `"indoor_worker"`, `"elderly_nonworking"`, `"other"`.
+  - `ActivityType`: Enum `"resting"`, `"walking"`, `"moderate_exercise"`, `"heavy_labor"`.
+  - `PersonalRiskRequest`: Validated payload with duration range `[0, 720]` minutes, optional `ward_id`, and optional `lat`/`lon`.
+  - `RiskFactorItem`: Individual point contribution, max points, description, and icon.
+  - `PersonalRiskResponse`: Structured output with score, tier, theme color, factor breakdown, clinical consequence, recommendation, and safer window.
+- **Calculation Engine (`personal_risk_engine.py`)**:
+  - Reuses `backend/gis/boundary_loader.py` and `spatial_join.py` to resolve GPS `(lat, lon)` or explicit `ward_id` to municipal boundaries.
+  - Reuses `backend/index_calculation/` to calculate live Liljegren Outdoor WBGT, NOAA Heat Index, and Bröde UTCI.
+  - Bounded 6-Factor Point-Contribution Scale (0–100 Points):
+    1. **Air Temperature** ($P_{\text{temp}} \in [0, 25]$ pts): Steadman (1979) dry-bulb baseline from 25.0°C to 45.0°C.
+    2. **High Humidity** ($P_{\text{humidity}} \in [0, 20]$ pts): Rothfusz (1990) non-linear vapor pressure inhibition of sweat evaporation.
+    3. **Solar Radiant Load & Wind** ($P_{\text{solar}} \in [0, 15]$ pts): ISO 7243 downward irradiance with convective wind attenuation.
+    4. **Physical Exertion** ($P_{\text{activity}} \in [0, 20]$ pts): ISO 8996 metabolic rate classes (resting: 0, walking: 7, moderate: 13, heavy labor: 20 pts).
+    5. **Exposure Duration** ($P_{\text{duration}} \in [0, 10]$ pts): ACGIH / NIOSH heat storage accumulation curve (15m: 1.5, 60m: 6.0, 90m: 8.0, $\ge$120m: 10.0 pts).
+    6. **Personal Vulnerability** ($P_{\text{personal}} \in [0, 10]$ pts): WHO (2015, 2021) and Census 2011/PLFS HVI demographic weights (elderly 60+: +6 pts, children 0-17: +3 pts, outdoor labor: +4 pts).
+  - Classifies tier using calibrated `TUNED_RISK_TIER_THRESHOLDS` (LOW: <25, MODERATE: 25–47, HIGH: 48–67, VERY_HIGH: 68–81, EXTREME: $\ge$82).
+  - Reuses `backend/vulnerability_model/health_consequence_map.py` (`COHORT_HEALTH_ACTIONS`) for clinical consequence and preventive medical actions.
+  - Algorithmic Diurnal Safer Time Window: Identifies cooler morning (<09:30 AM) or late evening (>05:45 PM) periods where solar flux and WBGT subside by >5°C.
+
+#### 2. REST API Endpoint (`backend/api/main.py`)
+- Mounted `POST /api/personal-risk/calculate` accepting `PersonalRiskRequest` and returning `PersonalRiskResponse`.
+- Added dependency injection with SQLAlchemy database session for live ward weather and vulnerability retrieval.
+
+#### 3. Frontend Standalone Tab & Card Interface (`frontend/`)
+- **Top-Level Tab Navigation (`index.html`)**: Added `.top-nav-bar` with `Ward Map View`, `Personal Heat Twin` (with "New" badge), and `Backtest Mode (May 2010)`.
+- **Personal Heat Twin Container (`#personal-heat-twin-view`)**: Responsive 2-column grid layout (`heat-twin-layout`):
+  - **Left Form Card**: Clean demographic selectors, live duration slider with hours conversion, GPS auto-detection button (`navigator.geolocation`), ward dropdown, and submission button.
+  - **Right Results Card**: Large risk score gauge with tier-colored circular border and glowing shadow, weather live ribbon (Air Temp, Humidity, WBGT, Heat Index, UTCI), 6-factor point-contribution list with gradient fill bars, safer diurnal window alert, clinical consequence block, and print/screenshot action button.
+- **Controller Logic (`main.js`)**:
+  - `bindNavTabs()`: Smooth switching between Map View and Personal Heat Twin view with Leaflet `map.invalidateSize()` handling.
+  - `populateTwinWards()`: Auto-populates ward dropdown from loaded GeoJSON features.
+  - `bindPersonalHeatTwin()`: Real-time slider feedback, geolocation acquisition, form validation, API submission, and result card rendering.
+- **API Client (`api.js`)**: Added `calculatePersonalRisk(payload)`.
+- **Projector-Ready Styling (`style.css`)**: High-contrast typography, glowing metric circles, responsive column stacking for laptops and mobile devices.
+
+#### 4. Presentation Script Enhancement (`DEMO_SCRIPT.md`)
+- Added **Phase 3B: Interactive "Personal Heat Twin" Live Demo (Minute 3:00 - 3:45)** guiding presenters to enter real details live in front of evaluators to showcase immediate personalized intelligence.
+
+---
+
+### Verification and Test Coverage
+- **Unit & Integration Tests (`backend/tests/test_personal_risk.py`)**:
+  - Young indoor worker resting scores LOW (<25 pts): PASSED.
+  - Elderly outdoor worker doing heavy labor for 90 min scores HIGH/EXTREME ($\ge$60 pts): PASSED.
+  - Monotonic risk ordering (Low < Medium < High): PASSED.
+  - Factor breakdown point sums match composite score: PASSED.
+  - GPS Lat/Lon spatial resolution to nearest ward: PASSED.
+  - Pydantic input validation for negative and excessive duration: PASSED.
+  - REST API endpoint `POST /api/personal-risk/calculate`: PASSED.
+- **Total Test Suite Status**: **97 Passed, 0 Failed (100% Pass Rate)** in 5.83s.
+- **Additive Verification**: All existing routes (`/api/wards/geojson`, `/api/risk/{ward_id}`, `/api/weather/{ward_id}`, `/api/copilot/chat`, `/api/alert/trigger`) remain 100% operational.
+

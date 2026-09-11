@@ -139,10 +139,12 @@ $$\text{Final Risk} = 0.60 \cdot \text{Thermal Hazard Score} + 0.40 \cdot \text{
 | `/api/forecast/{ward_id}` | `GET` | 5-day predictive trajectory | Daily predicted risk scores and risk tiers |
 | `/api/alert/trigger` | `POST` | `AlertResponse` Model | Triggers Twilio/Gupshup SMS/WhatsApp dispatch |
 | `/api/population-impact/{ward_id}` | `GET` | `PopulationImpactResponse` | Absolute cohort headcounts & clinical health actions |
+| `/api/personal-risk/calculate` | `POST` | `PersonalRiskResponse` | Personalized real-time heat hazard score, 6-factor points breakdown & clinical guidance |
 | `/api/copilot/chat` | `POST` | `CopilotChatResponse` | Conversational personal thermal risk & dashboard guidance |
 | `/api/backtest/summary` | `GET` | Historical event metadata | Benchmark citations and peak disaster statistics |
 | `/api/backtest/timeline` | `GET` | 13-day historical trajectory | Daily historical heatwave progression (May 2010) |
 | `/api/backtest/geojson` | `GET` | GeoJSON `FeatureCollection` | Peak historical disaster conditions (May 21, 2010) |
+
 
 ---
 
@@ -183,6 +185,47 @@ $$\text{Final Risk} = 0.60 \cdot \text{Thermal Hazard Score} + 0.40 \cdot \text{
 ```
 
 ---
+
+### 3.2 Personal Heat Twin Architecture (`/backend/personal_risk`)
+
+A dedicated interactive interface sitting alongside the municipal ward map, enabling any citizen or evaluator to calculate a personalized real-time heat hazard score, multi-factor attribution breakdown, and clinical safety protocol:
+
+```
++---------------------------------------------------------------------------------------------------+
+| USER PROFILE INPUT (Age, Occupation, Activity Level, Outdoor Duration, Ward / GPS)               |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| 1. LOCATION & OBSERVATION RESOLVER (personal_risk_engine.py)                                     |
+|   - Spatial nearest-neighbor join maps GPS (lat, lon) to Ahmedabad municipal ward polygon         |
+|   - Fetches live hourly meteorological parameters (Temp, RH, Wind, Solar Irradiance)              |
+|   - Calculates ISO 7243 Liljegren WBGT, NOAA Heat Index, and Bröde UTCI                          |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| 2. BOUNDED 6-FACTOR POINT-CONTRIBUTION ENGINE (0–100 Points Scale)                                |
+|   - P_temp        (max 25 pts) : Steadman 1979 apparent dry-bulb baseline (25°C to 45°C)          |
+|   - P_humidity    (max 20 pts) : Rothfusz 1990 vapor pressure evaporative sweat inhibition       |
+|   - P_solar       (max 15 pts) : Liljegren 2008 / ISO 7243 downward flux adjusted for wind       |
+|   - P_activity    (max 20 pts) : ISO 8996 metabolic rate (resting: 0, walking: 7, heavy: 20 pts) |
+|   - P_duration    (max 10 pts) : ACGIH / NIOSH heat storage accumulation curve                    |
+|   - P_personal    (max 10 pts) : WHO 2015/2021 & Census 2011/PLFS age/occupation fragility       |
+|   => Total Personal Heat Risk Score = Sum(P_i) in [0, 100]                                        |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| 3. CALIBRATED TIER CLASSIFICATION & CLINICAL ACTION MAPPING                                      |
+|   - Categorizes score via TUNED_RISK_TIER_THRESHOLDS (LOW, MODERATE, HIGH, VERY_HIGH, EXTREME)   |
+|   - Retrieves cohort clinical consequences and prevention guidance from health_consequence_map.py|
+|   - Suggests diurnal safer time window (e.g. before 09:30 AM or after 05:45 PM)                  |
++---------------------------------------------------------------------------------------------------+
+```
+
+---
+
 
 ### 4. Scientific Validation & Empirical Benchmarks
 

@@ -145,3 +145,19 @@ export async function sendCopilotMessage(payload) {
   return handleResponse(response);
 }
 
+/**
+ * Calculate personalized real-time heat risk profile.
+ * POST /api/personal-risk/calculate
+ */
+export async function calculatePersonalRisk(payload) {
+  const response = await fetch(`${BASE_URL}/api/personal-risk/calculate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+}
+
+

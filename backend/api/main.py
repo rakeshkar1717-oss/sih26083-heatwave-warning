@@ -46,6 +46,11 @@ from backend.vulnerability_model.health_consequence_map import (
     get_population_impact as compute_population_impact,
 )
 from backend.copilot import process_copilot_chat
+from backend.personal_risk import (
+    PersonalRiskRequest,
+    PersonalRiskResponse,
+    calculate_personal_risk,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -728,5 +733,27 @@ def copilot_chat_endpoint(
             intent="general_question",
             requires_ward_selection=False,
         )
+
+
+# ==============================================================================
+# Personal Heat Twin Risk Engine Endpoint (Feature Extension)
+# ==============================================================================
+
+@app.post("/api/personal-risk/calculate", response_model=PersonalRiskResponse)
+def personal_risk_calculate_endpoint(
+    payload: PersonalRiskRequest,
+    db: Session = Depends(get_db),
+) -> PersonalRiskResponse:
+    """Evaluate personalized real-time heat risk profile, factor breakdown, and clinical advice."""
+    try:
+        return calculate_personal_risk(payload, db=db)
+    except Exception as e:
+        logger.error("Personal risk calculation error: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to calculate personal heat risk: {str(e)}",
+        )
+
+
 
 
