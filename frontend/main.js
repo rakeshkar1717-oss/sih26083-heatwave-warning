@@ -1713,35 +1713,6 @@ function bindProfessionModes() {
 }
 
 /**
- * Populate Ward selector in Alert Subscription Widget.
- */
-function populateAlertSubscriptionWards() {
-  const wardSelect = document.getElementById("sub-ward-select");
-  if (!wardSelect || wardSelect.options.length > 5) return;
-
-  if (state.geojsonData && state.geojsonData.features) {
-    const wardFeatures = state.geojsonData.features.filter(
-      (f) => f.properties && f.properties.ward_id
-    );
-    if (wardFeatures.length > 0) {
-      wardSelect.innerHTML = "";
-      const sorted = [...wardFeatures].sort((a, b) =>
-        (a.properties.ward_name || "").localeCompare(b.properties.ward_name || "")
-      );
-      sorted.forEach((wf) => {
-        const opt = document.createElement("option");
-        opt.value = wf.properties.ward_id;
-        opt.textContent = `${wf.properties.ward_name} (${wf.properties.ward_id})`;
-        wardSelect.appendChild(opt);
-      });
-      if (state.selectedWardProps && state.selectedWardProps.ward_id) {
-        wardSelect.value = state.selectedWardProps.ward_id;
-      }
-    }
-  }
-}
-
-/**
  * Populate Ward selector in Alert Subscriptions from loaded features.
  */
 function populateAlertSubscriptionWards() {
