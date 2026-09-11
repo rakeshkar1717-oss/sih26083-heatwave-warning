@@ -129,3 +129,19 @@ export async function getPopulationImpact(wardId) {
   const response = await fetch(`${BASE_URL}/api/population-impact/${encodeURIComponent(wardId)}`);
   return handleResponse(response);
 }
+
+/**
+ * Send conversational inquiry to Heat Copilot assistant.
+ * POST /api/copilot/chat
+ */
+export async function sendCopilotMessage(payload) {
+  const response = await fetch(`${BASE_URL}/api/copilot/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+}
+

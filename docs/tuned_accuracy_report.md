@@ -4,13 +4,13 @@
 > **Evaluation Horizon**: Day 1 to Day 5 Forward Projections (24h to 120h Lead Times)  
 > **Evaluation Sample**: 4 Summer Seasons (April–June 2021–2024, Ahmedabad, Gujarat)  
 > **Sample Size**: 5,160 Ward-Horizon Forecast Evaluations (1,032 Daily Multi-Vulnerability Ground Truths)  
-> **Generated**: 2026-09-10 11:39:46 UTC
+> **Generated**: 2026-09-11 04:00:01 UTC
 
 ---
 
 ## 1. Executive Summary & Core Results
 
-Optimizes decision boundaries by analyzing confusion matrix boundary friction under subtropical pre-monsoon heat regimes. Adjusting the MODERATE boundary from 0.50 to 0.48 and HIGH from 0.70 to 0.68 aligns risk tier transitions directly with human physiological strain limits, eliminating boundary misclassifications.
+Final calibrated tuning audit.
 
 | Metric | Measured Value | Meteorological Benchmark Context |
 |:---|:---:|:---|

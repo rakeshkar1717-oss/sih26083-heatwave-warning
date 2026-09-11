@@ -313,6 +313,60 @@
     </div>
   </div>
 
+  <!-- Heat Copilot Floating Chat Widget (Day 12) -->
+  <button id="btn-copilot-toggle" class="copilot-toggle-btn" title="Open Heat Copilot Assistant" aria-label="Open Heat Copilot">
+    <span class="copilot-toggle-icon">💬</span>
+    <span class="copilot-toggle-badge">AI</span>
+  </button>
+
+  <div id="copilot-chat-window" class="copilot-chat-window" style="display: none;">
+    <div class="copilot-header">
+      <div class="copilot-header-info">
+        <div class="copilot-avatar">🔥</div>
+        <div>
+          <h3>Heat Copilot</h3>
+          <span class="copilot-subtitle">Personal Thermal Risk & Science Assistant</span>
+        </div>
+      </div>
+      <button id="btn-copilot-close" class="copilot-close-btn" title="Minimize Chat">&times;</button>
+    </div>
+
+    <div id="copilot-body" class="copilot-body">
+      <div id="copilot-messages" class="copilot-messages">
+        <div class="copilot-message copilot-message-bot">
+          <div class="copilot-bubble">
+            Hello! I am <strong>Heat Copilot</strong>, your conversational thermal risk assistant.
+            <br><br>
+            Ask me anything about your personal heat exposure risk (e.g. <em>"Is it safe to walk outside at 2 PM?"</em>),
+            thermal stress science (<em>"What does WBGT mean?"</em>), or how to use this dashboard!
+          </div>
+        </div>
+      </div>
+
+      <!-- Starter question chips -->
+      <div id="copilot-chips" class="copilot-chips">
+        <button class="copilot-chip" data-query="Is it safe to walk outside at 2 PM?">🚶 Safe to walk at 2 PM?</button>
+        <button class="copilot-chip" data-query="What does WBGT mean and why is it better than temperature?">🌡️ What does WBGT mean?</button>
+        <button class="copilot-chip" data-query="How accurate is this 5-day heatwave forecast?">🎯 How accurate is the forecast?</button>
+        <button class="copilot-chip" data-query="How do I view the 5-day forecast for my ward?">🗺️ How do I view my ward forecast?</button>
+      </div>
+
+      <div id="copilot-typing" class="copilot-typing" style="display: none;">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <form id="copilot-form" class="copilot-footer">
+      <input type="text" id="copilot-input" class="copilot-input" placeholder="Ask about heat safety or dashboard..." autocomplete="off" />
+      <button type="submit" id="copilot-send-btn" class="copilot-send-btn" title="Send message">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </form>
+  </div>
+
   <!-- Dashboard Footer -->
   <footer class="app-footer">
     <div class="footer-left">

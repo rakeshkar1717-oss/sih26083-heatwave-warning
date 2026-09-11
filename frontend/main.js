@@ -998,6 +998,132 @@ function bindSourcesModal() {
 }
 
 /**
+ * Heat Copilot Conversational Assistant Integration (Day 12).
+ */
+function bindHeatCopilot() {
+  const toggleBtn = document.getElementById("btn-copilot-toggle");
+  const closeBtn = document.getElementById("btn-copilot-close");
+  const chatWindow = document.getElementById("copilot-chat-window");
+  const form = document.getElementById("copilot-form");
+  const input = document.getElementById("copilot-input");
+  const messagesContainer = document.getElementById("copilot-messages");
+  const typingIndicator = document.getElementById("copilot-typing");
+  const chips = document.querySelectorAll(".copilot-chip");
+
+  if (!toggleBtn || !chatWindow || !form || !input) return;
+
+  const scrollToBottom = () => {
+    const body = document.getElementById("copilot-body");
+    if (body) {
+      body.scrollTop = body.scrollHeight;
+    }
+  };
+
+  const openChat = () => {
+    chatWindow.style.display = "flex";
+    input.focus();
+    scrollToBottom();
+  };
+
+  const closeChat = () => {
+    chatWindow.style.display = "none";
+  };
+
+  toggleBtn.addEventListener("click", () => {
+    if (chatWindow.style.display === "none" || !chatWindow.style.display) {
+      openChat();
+    } else {
+      closeChat();
+    }
+  });
+
+  if (closeBtn) closeBtn.addEventListener("click", closeChat);
+
+  const formatBotResponse = (text) => {
+    if (!text) return "";
+    let html = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
+    html = html.replace(/^#### (.*$)/gim, "<h4>$1</h4>");
+    html = html.replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>");
+    html = html.replace(/\*(.*?)\*/gim, "<em>$1</em>");
+    html = html.replace(/^---$/gim, "<hr>");
+    html = html.replace(/^\* (.*$)/gim, "<li>$1</li>");
+    html = html.replace(/(<li>.*<\/li>)/gims, "<ul>$1</ul>");
+    html = html.replace(/<\/h3>\n/g, "</h3>");
+    html = html.replace(/<\/h4>\n/g, "</h4>");
+    html = html.replace(/<\/ul>\n/g, "</ul>");
+    html = html.replace(/\n\n/g, "<br><br>");
+    html = html.replace(/\n/g, "<br>");
+    return html;
+  };
+
+  const appendUserMessage = (msgText) => {
+    const msgEl = document.createElement("div");
+    msgEl.className = "copilot-message copilot-message-user";
+    msgEl.innerHTML = `<div class="copilot-bubble">${msgText}</div>`;
+    messagesContainer.appendChild(msgEl);
+    scrollToBottom();
+  };
+
+  const appendBotMessage = (formattedHtml) => {
+    const msgEl = document.createElement("div");
+    msgEl.className = "copilot-message copilot-message-bot";
+    msgEl.innerHTML = `<div class="copilot-bubble">${formattedHtml}</div>`;
+    messagesContainer.appendChild(msgEl);
+    scrollToBottom();
+  };
+
+  const handleSendMessage = async (text) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    appendUserMessage(trimmed);
+    input.value = "";
+    if (typingIndicator) typingIndicator.style.display = "flex";
+    scrollToBottom();
+
+    const currentWardId = state.selectedWardProps ? state.selectedWardProps.ward_id : null;
+
+    try {
+      const payload = {
+        message: trimmed,
+        ward_id: currentWardId,
+        user_context: {},
+      };
+
+      const result = await api.sendCopilotMessage(payload);
+      if (typingIndicator) typingIndicator.style.display = "none";
+
+      const html = formatBotResponse(result.response_text);
+      appendBotMessage(html);
+    } catch (err) {
+      if (typingIndicator) typingIndicator.style.display = "none";
+      appendBotMessage(
+        `<p style="color: #ef4444;">⚠️ Connection to Heat Copilot service interrupted (${err.message}). Please check backend status.</p>`
+      );
+    }
+  };
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    handleSendMessage(input.value);
+  });
+
+  chips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const q = chip.getAttribute("data-query");
+      if (q) {
+        handleSendMessage(q);
+      }
+    });
+  });
+}
+
+/**
  * Main Application Bootstrapper.
  */
 async function main() {
@@ -1008,6 +1134,7 @@ async function main() {
   bindInfoModal();
   bindSourcesModal();
   bindAlertButton();
+  bindHeatCopilot();
   await updateSystemStatus();
   await loadDashboardData();
   startAutoRefresh();

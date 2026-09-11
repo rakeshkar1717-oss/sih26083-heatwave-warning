@@ -37,12 +37,15 @@ from backend.models import (
     RiskLevel,
     WardRiskScore,
     PopulationImpactResponse,
+    CopilotChatRequest,
+    CopilotChatResponse,
 )
 from backend.alerts.alert_engine import send_ward_alert
 from backend.vulnerability_model.health_consequence_map import (
     build_population_impact_breakdown,
     get_population_impact as compute_population_impact,
 )
+from backend.copilot import process_copilot_chat
 
 logger = logging.getLogger(__name__)
 
@@ -701,4 +704,29 @@ def get_forecast_accuracy_report() -> Dict[str, Any]:
             "chart_url": "/assets/forecast_accuracy_matrix.png",
         }
     return _forecast_accuracy_cache
+
+
+# ==============================================================================
+# Heat Copilot Conversational AI Endpoint (Day 12)
+# ==============================================================================
+
+@app.post("/api/copilot/chat", response_model=CopilotChatResponse)
+def copilot_chat_endpoint(
+    payload: CopilotChatRequest,
+    db: Session = Depends(get_db),
+) -> CopilotChatResponse:
+    """Conversational Heat Copilot assistant for personal thermal risk and dashboard guidance."""
+    try:
+        return process_copilot_chat(payload, db=db)
+    except Exception as e:
+        logger.error("Copilot chat processing error: %s", e, exc_info=True)
+        return CopilotChatResponse(
+            response_text=(
+                "I apologize, but I encountered an error processing your query. "
+                "Please make sure your ward is selected on the map or ask: 'What does WBGT mean?'"
+            ),
+            intent="general_question",
+            requires_ward_selection=False,
+        )
+
 

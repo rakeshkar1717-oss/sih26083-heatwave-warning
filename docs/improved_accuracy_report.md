@@ -4,13 +4,13 @@
 > **Evaluation Horizon**: Day 1 to Day 5 Forward Projections (24h to 120h Lead Times)  
 > **Evaluation Sample**: 4 Summer Seasons (April–June 2021–2024, Ahmedabad, Gujarat)  
 > **Sample Size**: 5,160 Ward-Horizon Forecast Evaluations (1,032 Daily Multi-Vulnerability Ground Truths)  
-> **Generated**: 2026-09-10 11:39:46 UTC
+> **Generated**: 2026-09-11 04:00:01 UTC
 
 ---
 
 ## 1. Executive Summary & Core Results
 
-Introduces real multi-source data fusion combining ground-derived models from Open-Meteo with orbital satellite surface solar irradiance and atmospheric profiles from NASA POWER. A 50/50 weighted consensus reduces sensor drift and microclimatic bias, reducing temperature prediction error across all 5 operational forecast horizons.
+Multi-source consensus with bias correction.
 
 | Metric | Measured Value | Meteorological Benchmark Context |
 |:---|:---:|:---|

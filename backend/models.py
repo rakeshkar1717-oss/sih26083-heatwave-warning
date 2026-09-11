@@ -350,3 +350,39 @@ class AlertResponse(BaseModel):
     channel: AlertChannel
     dispatched_at: datetime = Field(default_factory=datetime.utcnow)
     detail: str
+
+
+# ==============================================================================
+# 6. Heat Copilot Conversational Assistant Schemas (Day 12 Scope)
+# ==============================================================================
+
+class CopilotIntent(str, Enum):
+    """Categorical user message intent for Heat Copilot."""
+    PERSONAL_RISK_QUERY = "personal_risk_query"
+    GENERAL_QUESTION = "general_question"
+    DASHBOARD_HELP = "dashboard_help"
+
+
+class CopilotChatRequest(BaseModel):
+    """Payload for conversational queries to Heat Copilot."""
+
+    message: str = Field(..., description="User chat query")
+    ward_id: Optional[str] = Field(default=None, description="Optional municipal ward ID (e.g. 'AMD_01')")
+    user_context: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Optional demographic or personal context e.g. {'age_group': 'elderly', 'activity': 'outdoor_labor'}"
+    )
+
+
+class CopilotChatResponse(BaseModel):
+    """Structured response from Heat Copilot."""
+
+    response_text: str = Field(..., description="Main conversational response text")
+    intent: Optional[str] = Field(default=None, description="Classified query intent")
+    risk_score: Optional[float] = Field(default=None, description="Calculated risk score if personal query (0.0 to 1.0)")
+    risk_tier: Optional[str] = Field(default=None, description="Calculated risk tier (LOW, MODERATE, HIGH, VERY_HIGH, EXTREME)")
+    recommendation: Optional[str] = Field(default=None, description="Action recommendation (e.g. Avoid, Caution, Safe)")
+    suggested_better_time: Optional[str] = Field(default=None, description="Suggested safer time window if high risk")
+    dominant_factor: Optional[str] = Field(default=None, description="Primary physiological or thermal driver of risk")
+    requires_ward_selection: bool = Field(default=False, description="True if copilot needs user to pick or name a ward")
+

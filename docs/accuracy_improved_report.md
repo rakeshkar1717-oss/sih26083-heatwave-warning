@@ -1,4 +1,4 @@
-# SIH26083 Forecast Accuracy Report: Stage 1 - Baseline (Single-Source Open-Meteo)
+# SIH26083 Forecast Accuracy Report: Stage 2 - Multi-Source Meteorological Data Fusion & Bias Correction
 
 > **Document Type**: Scientific Validation & Operational Accuracy Audit  
 > **Evaluation Horizon**: Day 1 to Day 5 Forward Projections (24h to 120h Lead Times)  
@@ -10,18 +10,18 @@
 
 ## 1. Executive Summary & Core Results
 
-Single-source baseline audit.
+Introduces real multi-source data fusion combining ground-derived models from Open-Meteo with orbital satellite surface solar irradiance and atmospheric profiles from NASA POWER. Systematic empirical bias correction (+0.73C temp, -4.7% RH for NASA POWER) and optimal inverse-MAE weighted consensus reduce temperature prediction error across all 5 operational forecast horizons.
 
 | Metric | Measured Value | Meteorological Benchmark Context |
 |:---|:---:|:---|
-| **Overall Classification Accuracy** | **83.47%** | Exact match across 5 canonical heat risk tiers |
+| **Overall Classification Accuracy** | **83.53%** | Exact match across 5 canonical heat risk tiers |
 | **Adjacent-Tier Accuracy (±1 Tier)** | **100.00%** | Standard operational tolerance in numerical weather prediction |
 | **Total Evaluations** | **5,160** | Rigorous multi-horizon evaluation across 3 vulnerability archetypes |
-| **Correct Alert Classifications** | **4,307 / 5,160** | Zero data leakage; strict historical cutoffs |
-| **Max Temperature MAE** | **1.731°C** | Mean Absolute Error against ground truth observations |
-| **Max Temperature RMSE** | **2.436°C** | Root Mean Square Error penalizing large synoptic misses |
-| **Biometeorological Hazard MAE** | **4.508 / 100** | Composite NOAA HI, WBGT, and UTCI error |
-| **Composite Risk Score MAE** | **0.0270** | Continuous 0.00 to 1.00 ward risk index error |
+| **Correct Alert Classifications** | **4,310 / 5,160** | Zero data leakage; strict historical cutoffs |
+| **Max Temperature MAE** | **1.616°C** | Mean Absolute Error against ground truth observations |
+| **Max Temperature RMSE** | **2.246°C** | Root Mean Square Error penalizing large synoptic misses |
+| **Biometeorological Hazard MAE** | **4.480 / 100** | Composite NOAA HI, WBGT, and UTCI error |
+| **Composite Risk Score MAE** | **0.0269** | Continuous 0.00 to 1.00 ward risk index error |
 
 ---
 
@@ -31,13 +31,13 @@ Operational weather forecasts experience atmospheric error growth as lead time i
 
 | Forecast Horizon | Lead Time | Total Forecasts | Correct Classifications | Accuracy % | Temperature MAE (°C) | Risk MAE |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Day 1** | 24 hours | 1032 | 884 | **85.66%** | 1.191°C | 0.0240 |
-| **Day 2** | 48 hours | 1032 | 864 | **83.72%** | 1.552°C | 0.0265 |
-| **Day 3** | 72 hours | 1032 | 860 | **83.33%** | 1.796°C | 0.0271 |
-| **Day 4** | 96 hours | 1032 | 854 | **82.75%** | 1.983°C | 0.0278 |
-| **Day 5** | 120 hours | 1032 | 845 | **81.88%** | 2.132°C | 0.0299 |
+| **Day 1** | 24 hours | 1032 | 890 | **86.24%** | 1.038°C | 0.0227 |
+| **Day 2** | 48 hours | 1032 | 867 | **84.01%** | 1.462°C | 0.0259 |
+| **Day 3** | 72 hours | 1032 | 860 | **83.33%** | 1.694°C | 0.0270 |
+| **Day 4** | 96 hours | 1032 | 857 | **83.04%** | 1.875°C | 0.0283 |
+| **Day 5** | 120 hours | 1032 | 836 | **81.01%** | 2.014°C | 0.0305 |
 
-> **Key Observation**: The forecasting engine demonstrates robust skill across all operational horizons. Even at Day 5 (120 hours out), the model retains strong predictive skill (81.88% accuracy), providing municipal authorities with actionable lead time to mobilize water tankers and cooling shelters.
+> **Key Observation**: The forecasting engine demonstrates robust skill across all operational horizons. Even at Day 5 (120 hours out), the model retains strong predictive skill (81.01% accuracy), providing municipal authorities with actionable lead time to mobilize water tankers and cooling shelters.
 
 ---
 
@@ -46,9 +46,9 @@ Operational weather forecasts experience atmospheric error growth as lead time i
 | Actual \ Predicted | LOW | MODERATE | HIGH | VERY_HIGH | EXTREME | Total Actual | Recall % |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **LOW** | 0 | 0 | 0 | 0 | 0 | **0** | **0.0%** |
-| **MODERATE** | 0 | 578 | 227 | 0 | 0 | **805** | **71.8%** |
-| **HIGH** | 0 | 300 | 2404 | 101 | 0 | **2805** | **85.7%** |
-| **VERY_HIGH** | 0 | 0 | 225 | 1325 | 0 | **1550** | **85.5%** |
+| **MODERATE** | 0 | 603 | 202 | 0 | 0 | **805** | **74.9%** |
+| **HIGH** | 0 | 282 | 2434 | 89 | 0 | **2805** | **86.8%** |
+| **VERY_HIGH** | 0 | 0 | 277 | 1273 | 0 | **1550** | **82.1%** |
 | **EXTREME** | 0 | 0 | 0 | 0 | 0 | **0** | **0.0%** |
 
 ---
@@ -58,9 +58,9 @@ Operational weather forecasts experience atmospheric error growth as lead time i
 | Risk Tier | Support (Ground Truth) | Predicted Count | Precision % | Recall % | F1 Score |
 |:---|:---:|:---:|:---:|:---:|:---:|
 | **LOW** | 0 | 0 | 0.00% | 0.00% | 0.00 |
-| **MODERATE** | 805 | 878 | 65.83% | 71.80% | 68.69 |
-| **HIGH** | 2805 | 2856 | 84.17% | 85.70% | 84.93 |
-| **VERY_HIGH** | 1550 | 1426 | 92.92% | 85.48% | 89.04 |
+| **MODERATE** | 805 | 885 | 68.14% | 74.91% | 71.36 |
+| **HIGH** | 2805 | 2913 | 83.56% | 86.77% | 85.13 |
+| **VERY_HIGH** | 1550 | 1362 | 93.47% | 82.13% | 87.43 |
 | **EXTREME** | 0 | 0 | 0.00% | 0.00% | 0.00 |
 
 ---

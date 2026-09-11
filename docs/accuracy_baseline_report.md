@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Core Results
 
-Single-source baseline audit.
+Represents the pre-improvement system state relying exclusively on single-source numerical weather prediction (Open-Meteo) and standard default risk thresholds (LOW: 0.25, MODERATE: 0.50, HIGH: 0.70, VERY_HIGH: 0.85).
 
 | Metric | Measured Value | Meteorological Benchmark Context |
 |:---|:---:|:---|

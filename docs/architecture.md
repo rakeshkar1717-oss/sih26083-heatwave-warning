@@ -138,9 +138,49 @@ $$\text{Final Risk} = 0.60 \cdot \text{Thermal Hazard Score} + 0.40 \cdot \text{
 | `/api/weather/{ward_id}` | `GET` | Meteorological history dictionary | Current weather observations + 24h history |
 | `/api/forecast/{ward_id}` | `GET` | 5-day predictive trajectory | Daily predicted risk scores and risk tiers |
 | `/api/alert/trigger` | `POST` | `AlertResponse` Model | Triggers Twilio/Gupshup SMS/WhatsApp dispatch |
+| `/api/population-impact/{ward_id}` | `GET` | `PopulationImpactResponse` | Absolute cohort headcounts & clinical health actions |
+| `/api/copilot/chat` | `POST` | `CopilotChatResponse` | Conversational personal thermal risk & dashboard guidance |
 | `/api/backtest/summary` | `GET` | Historical event metadata | Benchmark citations and peak disaster statistics |
 | `/api/backtest/timeline` | `GET` | 13-day historical trajectory | Daily historical heatwave progression (May 2010) |
 | `/api/backtest/geojson` | `GET` | GeoJSON `FeatureCollection` | Peak historical disaster conditions (May 21, 2010) |
+
+---
+
+### 3.1 Heat Copilot Conversational Assistant Architecture (`/backend/copilot`)
+
+```
++---------------------------------------------------------------------------------------------------+
+| USER QUERY ("Is it safe to walk to college at 2 PM in Navrangpura?")                              |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| 1. INTENT ROUTER (intent_router.py)                                                               |
+|   - Regex & semantic keyword classification: personal_risk_query / general_question / dashboard_help|
+|   - Optional LLM classification enhancement with automatic zero-downtime deterministic fallback   |
++--------------------------------------------------+------------------------------------------------+
+                                                   |
+         +-----------------------------------------+-----------------------------------------+
+         | (personal_risk_query)                   | (general_question)                      | (dashboard_help)
+         v                                         v                                         v
++------------------------------------+    +------------------------------------+    +------------------------------------+
+| PERSONAL RISK HANDLER              |    | GENERAL Q&A HANDLER                |    | DASHBOARD HELP HANDLER             |
+| (personal_risk_handler.py)         |    | (general_qa_handler.py)            |    | (dashboard_help_handler.py)        |
+| - Entity extraction: time, activity|    | - Science FAQ: WBGT, UTCI,         |    | - Interactive guide for map layers,|
+|   duration, and vulnerability      |    |   NOAA Heat Index, HVI formula     |    |   ward selection, 5-day charts,    |
+| - Dynamic thermal strain modeling  |    | - Data sources: Census 2011, PLFS  |    |   backtest toggle & SMS alerts     |
+| - ThermoGuard structured advice    |    | - 85.43% multi-horizon accuracy    |    +-----------------+------------------+
++-----------------+------------------+    +-----------------+------------------+                      |
+                  |                                         |                                         |
+                  +-----------------------------------------+-----------------------------------------+
+                                                            |
+                                                            v
++---------------------------------------------------------------------------------------------------+
+| 2. OPTIONAL LLM POLISH & DETERMINISTIC FALLBACK (llm_client.py)                                   |
+|   - Rephrases conversational output if ANTHROPIC_API_KEY, OPENAI_API_KEY, or GEMINI_API_KEY present|
+|   - Strict invariant rule: NEVER invents or alters any calculated temperature, WBGT, or risk numbers|
++---------------------------------------------------------------------------------------------------+
+```
 
 ---
 

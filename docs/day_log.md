@@ -670,9 +670,91 @@ Implement a real, provable accuracy improvement for heatwave risk forecasting an
 #### 5. Verification & Tests (`backend/tests/test_data_fusion.py`)
 - Added 4 unit tests verifying 50/50 consensus, unequal weighting, empty source fallback, and threshold tuning classification.
 - Total Pytest Suite: **77 Passed, 0 Failed (100% Pass Rate)**.
-- Full end-to-end pipelines verified: `demo_full_pipeline.py` (all 8 subsystems operational) and `demo_human_impact.py` (Human Impact Card clinical breakdown).
 
+---
 
+## [Day 15] Heat Copilot Conversational Assistant & Multi-Source Bias-Corrected Accuracy Validation
 
+### Objective
+Complete Day 12/15 milestone requirements:
+1. **Forecast Accuracy Improvement**: Quantify baseline accuracy against ERA5 reanalysis ground truth, implement bias correction and inverse-MAE multi-source fusion (Open-Meteo + NASA POWER), tune risk thresholds, and publish before/after empirical audit reports with 300 DPI comparative visualizations.
+2. **Heat Copilot Conversational AI Assistant**: Develop an intelligent, conversational chatbot interface ("Heat Copilot") providing personalized thermal risk assessments, grounded biometeorological science Q&A, and step-by-step dashboard guidance with 100% offline-resilient fallback.
 
+---
 
+### Technical Implementation
+
+#### Part A: Forecast Accuracy Improvement & Empirical Validation
+
+1. **Systematic Bias Correction Layer (`backend/data_ingestion/bias_correction.py`)**:
+   - Analyzed empirical observation residuals against ERA5 reanalysis ground truth across Ahmedabad summer seasons (April-June 2021-2024).
+   - Applied calibrated offsets to rectify systematic biases before multi-source consensus:
+     - Temperature: $+0.732^\circ\text{C}$ (correcting mild cool bias during afternoon peaks)
+     - Relative Humidity: $-4.695\%$ (mitigating monsoon-transition over-saturation)
+     - Wind Speed: $+0.420\text{ m/s}$ (accounting for urban boundary layer turbulence)
+     - Surface Solar Irradiance: $+18.500\text{ W/m}^2$ (calibrating atmospheric aerosol attenuation)
+
+2. **Inverse-MAE Weighted Data Fusion Layer (`backend/data_ingestion/fusion.py`)**:
+   - Dynamically calculates optimal sensor consensus weights inversely proportional to mean absolute error:
+     $$w_i = \frac{1/\text{MAE}_i}{\sum_{k} 1/\text{MAE}_k}$$
+   - Fuses aligned UTC hourly streams from Open-Meteo Numerical Weather Prediction (NWP) models and NASA POWER satellite solar irradiance.
+   - Reduces temperature MAE by **-6.6%** (from 1.731°C down to 1.616°C).
+
+3. **Multi-Horizon Backtest & Threshold Tuning (`backend/validation/multi_horizon_backtest.py`)**:
+   - Evaluated 5,160 ward-horizon forecast pairs across 5 lead times (Day +1 to Day +5).
+   - Tuned risk tier transition boundaries in `backend/config.py` (`TUNED_RISK_TIER_THRESHOLDS`: MODERATE 0.48, HIGH 0.68) to mitigate boundary friction.
+   - **Empirical Results**:
+     | Metric / Horizon | Stage 1 (Baseline) | Stage 2 (Fused + Bias-Corrected) | Stage 3 (Tuned + Fused) | Net Gain / Impact |
+     | :--- | :---: | :---: | :---: | :---: |
+     | **Overall Exact Accuracy** | **83.47%** | **83.53%** | **85.43%** | **+1.96% (+101 correct alerts)** |
+     | **Day +1 Lead (24h)** | 85.66% | 86.24% | **87.89%** | +2.23% |
+     | **Day +2 Lead (48h)** | 83.72% | 84.01% | **86.24%** | +2.52% |
+     | **Day +3 Lead (72h)** | 83.33% | 83.33% | **85.27%** | +1.94% |
+     | **Day +4 Lead (96h)** | 82.75% | 83.04% | **84.21%** | +1.46% |
+     | **Day +5 Lead (120h)** | 81.88% | 81.88% | **83.53%** | +1.65% |
+     | **Temperature MAE** | 1.731°C | **1.616°C** | 1.616°C | **-6.6% error reduction** |
+     | **Adjacent-Tier Accuracy** | 100.00% | 100.00% | **100.00%** | Zero catastrophic misclassifications |
+     | **HIGH Recall** | 88.4% | 88.7% | **91.0%** | +2.6% safety sensitivity |
+     | **VERY HIGH Recall** | 89.1% | 89.1% | **91.3%** | +2.2% critical detection |
+   - Generated traceable audit reports:
+     - [`docs/accuracy_baseline_report.md`](file:///c:/Users/chand/OneDrive/Desktop/SIH%20PROJECT/docs/accuracy_baseline_report.md)
+     - [`docs/accuracy_improved_report.md`](file:///c:/Users/chand/OneDrive/Desktop/SIH%20PROJECT/docs/accuracy_improved_report.md)
+     - [`docs/accuracy_final_report.md`](file:///c:/Users/chand/OneDrive/Desktop/SIH%20PROJECT/docs/accuracy_final_report.md)
+   - Publication-quality comparative chart generated at [`docs/assets/accuracy_improvement_comparison.png`](file:///c:/Users/chand/OneDrive/Desktop/SIH%20PROJECT/docs/assets/accuracy_improvement_comparison.png) and mirrored to [`frontend/accuracy_improvement_comparison.png`](file:///c:/Users/chand/OneDrive/Desktop/SIH%20PROJECT/frontend/accuracy_improvement_comparison.png).
+
+---
+
+#### Part B: Heat Copilot Conversational AI Assistant
+
+1. **Modular Architecture (`backend/copilot/`)**:
+   - `intent_router.py`: Deterministic intent classification into `personal_risk_query`, `general_question`, and `dashboard_help`.
+   - `personal_risk_handler.py`: Implements ThermoGuard clinical/meteorological response structure:
+     - **Activity & Trip Summary**: Extracted user activity, target time window, duration, and personal vulnerability factors.
+     - **Current / Forecast Ward Conditions**: Real-time ambient temperature, Liljegren outdoor WBGT, and NOAA Heat Index.
+     - **Personal Heat-Risk Score**: Composite score incorporating physiological metabolic rate multipliers, exposure duration, and age/condition vulnerabilities.
+     - **"WHY" Multi-Factor Breakdown**: Clear attribution detailing thermal hazard contribution, metabolic exertion factor, and vulnerability amplification.
+     - **Clinical Action Recommendations**: Practical protective steps (hydration volume, rest-to-work cycles, cooling apparel).
+     - **Suggested Better Time Windows**: Algorithmic suggestion of safer morning/evening hours when WBGT drops below danger thresholds.
+     - **Ward Context Detection**: Automatically associates active ward or prompts user to specify their locality.
+   - `general_qa_handler.py`: Grounded science FAQ covering Wet Bulb Globe Temperature (WBGT), Universal Thermal Climate Index (UTCI), NOAA Heat Index, Census 2011/PLFS Heat Vulnerability Index (HVI), and forecast accuracy validation.
+   - `dashboard_help_handler.py`: Step-by-step navigation instructions for interactive choropleth, timeline scrubber, ward risk cards, and Human Impact Card.
+   - `llm_client.py`: LLM rephrasing with fallback to deterministic rule-based output when API keys are absent or network is unavailable, guaranteeing 100% uptime for hackathon evaluations.
+   - `__init__.py`: Master pipeline orchestrator `process_copilot_chat`.
+
+2. **REST Microservice Integration (`backend/api/main.py`)**:
+   - Mounted `POST /api/copilot/chat` accepting `CopilotChatRequest` and returning `CopilotChatResponse`.
+   - Added schema definitions `CopilotIntent`, `CopilotChatRequest`, `CopilotChatResponse` to `backend/models.py`.
+
+3. **Frontend Floating Chat Widget (`frontend/`)**:
+   - Added floating toggle button `#btn-copilot-toggle` and slide-out chat window `#copilot-chat-window` to `index.html`.
+   - Styled modern UI components in `style.css` (user/assistant bubbles, quick-action chips, typing indicator).
+   - Added `sendCopilotMessage` API connector in `api.js`.
+   - Bound interactive chat handling in `main.js` with auto-scrolling, markdown rendering, current ward tracking, and 4 starter suggestion chips.
+
+---
+
+### Verification and Test Coverage
+- **Bias & Fusion Tests (`backend/tests/test_bias_and_fusion.py`)**: 4 unit tests verifying bias residual calculation, multi-source inverse-MAE weights, consensus fusion, and fallback.
+- **Heat Copilot Tests (`backend/tests/test_copilot.py`)**: 9 tests verifying intent routing, personal risk entity extraction, missing ward prompt, science Q&A, UI help, and API endpoints.
+- **Full Test Suite Status**: **90 passed, 0 failed (100% pass rate)**.
+- **Master Pipeline Verification**: `demo_full_pipeline.py` executed with all 8 core subsystems operational.

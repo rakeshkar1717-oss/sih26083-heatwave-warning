@@ -720,13 +720,16 @@ def run_full_multi_horizon_benchmark() -> Dict[str, Any]:
     )
     metrics_s3 = evaluate_stage_metrics(df_stage3)
 
-    # 5. Generate the 3 Markdown Reports in /docs/
+    # 5. Generate the Markdown Reports in /docs/
     docs_dir = PROJECT_ROOT / "docs"
-    r1_path = docs_dir / "baseline_accuracy_report.md"
-    r2_path = docs_dir / "improved_accuracy_report.md"
-    r3_path = docs_dir / "tuned_accuracy_report.md"
+    r1_path = docs_dir / "accuracy_baseline_report.md"
+    r2_path = docs_dir / "accuracy_improved_report.md"
+    r3_path = docs_dir / "accuracy_final_report.md"
+    r1_legacy = docs_dir / "baseline_accuracy_report.md"
+    r2_legacy = docs_dir / "improved_accuracy_report.md"
+    r3_legacy = docs_dir / "tuned_accuracy_report.md"
 
-    logger.info("Writing Stage 1 report: %s", r1_path)
+    logger.info("Writing Stage 1 baseline reports: %s", r1_path)
     generate_stage_report(
         metrics=metrics_s1,
         stage_id=1,
@@ -738,26 +741,40 @@ def run_full_multi_horizon_benchmark() -> Dict[str, Any]:
         ),
         output_path=r1_path,
     )
+    generate_stage_report(
+        metrics=metrics_s1,
+        stage_id=1,
+        stage_name="Baseline (Single-Source Open-Meteo)",
+        stage_desc="Single-source baseline audit.",
+        output_path=r1_legacy,
+    )
 
-    logger.info("Writing Stage 2 report: %s", r2_path)
+    logger.info("Writing Stage 2 improved reports: %s", r2_path)
+    generate_stage_report(
+        metrics=metrics_s2,
+        stage_id=2,
+        stage_name="Multi-Source Meteorological Data Fusion & Bias Correction",
+        stage_desc=(
+            "Introduces real multi-source data fusion combining ground-derived models from Open-Meteo "
+            "with orbital satellite surface solar irradiance and atmospheric profiles from NASA POWER. "
+            "Systematic empirical bias correction (+0.73C temp, -4.7% RH for NASA POWER) and optimal "
+            "inverse-MAE weighted consensus reduce temperature prediction error across all 5 operational forecast horizons."
+        ),
+        output_path=r2_path,
+    )
     generate_stage_report(
         metrics=metrics_s2,
         stage_id=2,
         stage_name="Multi-Source Meteorological Data Fusion",
-        stage_desc=(
-            "Introduces real multi-source data fusion combining ground-derived models from Open-Meteo "
-            "with orbital satellite surface solar irradiance and atmospheric profiles from NASA POWER. "
-            "A 50/50 weighted consensus reduces sensor drift and microclimatic bias, reducing temperature "
-            "prediction error across all 5 operational forecast horizons."
-        ),
-        output_path=r2_path,
+        stage_desc="Multi-source consensus with bias correction.",
+        output_path=r2_legacy,
     )
 
-    logger.info("Writing Stage 3 report: %s", r3_path)
+    logger.info("Writing Stage 3 tuned reports: %s", r3_path)
     generate_stage_report(
         metrics=metrics_s3,
         stage_id=3,
-        stage_name="Calibrated Risk Threshold Tuning",
+        stage_name="Calibrated Risk Threshold Tuning (Final)",
         stage_desc=(
             "Optimizes decision boundaries by analyzing confusion matrix boundary friction under "
             "subtropical pre-monsoon heat regimes. Adjusting the MODERATE boundary from 0.50 to 0.48 "
@@ -765,6 +782,13 @@ def run_full_multi_horizon_benchmark() -> Dict[str, Any]:
             "strain limits, eliminating boundary misclassifications."
         ),
         output_path=r3_path,
+    )
+    generate_stage_report(
+        metrics=metrics_s3,
+        stage_id=3,
+        stage_name="Calibrated Risk Threshold Tuning",
+        stage_desc="Final calibrated tuning audit.",
+        output_path=r3_legacy,
     )
 
     # 6. Generate High-Res Comparative Visualizations
