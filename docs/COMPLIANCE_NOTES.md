@@ -75,11 +75,21 @@ For live production deployment across Indian telecommunications networks (Airtel
 
 ---
 
-## 6. Summary Checklist
+## 6. Message Delivery Architecture: Sandbox Simulation vs. Live Gateway
+
+| Mode | Trigger Condition | Delivery Mechanism | How Citizen Receives |
+| :--- | :--- | :--- | :--- |
+| **🟡 Sandbox Simulation (Default)** | No Twilio API keys set, or test environment | Backend registers subscriber in database, generates tracking SID (`SM...` or `WA...`), logs consent audit, and displays the exact message bubble on the web UI. | **On-Screen Message Bubble + 1-Click WhatsApp Link** (`https://api.whatsapp.com/send?...`) allowing the user to open or forward the exact alert in WhatsApp or SMS immediately, plus native browser notifications. |
+| **🟢 Live Carrier Dispatch** | `TWILIO_ACCOUNT_SID` & `TWILIO_AUTH_TOKEN` set | Transmitted via Twilio REST API to telecom operators or WhatsApp servers. | Delivered directly to physical phone. *(Note: For Twilio WhatsApp Sandbox, user must first send `join <keyword>` to `+1 415 523 8886` as required by Meta policy).* |
+
+---
+
+## 7. Summary Checklist
 
 - [x] Double opt-in confirmation message dispatched immediately upon signup.
 - [x] Automated webhook handler for `STOP` / `UNSUBSCRIBE` keyword deactivation.
 - [x] Immutable `consent_logs` table tracking opt-in and opt-out timestamps.
 - [x] Rate limiting: Max 3 subscription attempts per phone per hour.
 - [x] Daily cap: Max 3 alerts per subscriber per day.
+- [x] On-screen message bubble & 1-click WhatsApp web dispatch for sandbox mode.
 - [x] Documented roadmap for TRAI DLT registration and DND compliance.

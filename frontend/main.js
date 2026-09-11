@@ -1826,10 +1826,79 @@ function bindAlertSubscription() {
         if (feedbackBanner) {
           feedbackBanner.style.display = "block";
           feedbackBanner.className = "sub-feedback-banner success";
+
+          const isSimulated = res.delivery_mode === "simulated";
+          const channelUpper = (res.channel || channel).toUpperCase();
+          const channelIcon = channelUpper === "WHATSAPP" ? "💬" : "📱";
+
+          let actionBtnHtml = "";
+          if (channelUpper === "WHATSAPP" && res.whatsapp_url) {
+            actionBtnHtml = `
+              <div class="sub-action-row">
+                <a href="${res.whatsapp_url}" target="_blank" rel="noopener noreferrer" class="btn-sub-whatsapp-action">
+                  <span>💬</span> Open in WhatsApp / Send Alert Now
+                </a>
+                <span class="sub-action-hint">Tap to launch WhatsApp with your pre-formatted confirmation alert.</span>
+              </div>
+            `;
+          } else if (res.sms_url) {
+            actionBtnHtml = `
+              <div class="sub-action-row">
+                <a href="${res.sms_url}" class="btn-sub-sms-action">
+                  <span>✉️</span> Open in SMS App
+                </a>
+                <span class="sub-action-hint">Tap to open your default messaging app.</span>
+              </div>
+            `;
+          }
+
           feedbackBanner.innerHTML = `
-            <strong>✅ Check your phone!</strong> A confirmation ${channel.toUpperCase()} has been sent for <strong>${res.ward_name}</strong>.
-            Reply <strong>STOP</strong> anytime to unsubscribe.
+            <div class="sub-result-card">
+              <div class="sub-result-header">
+                <div class="sub-result-badge ${isSimulated ? 'badge-sandbox' : 'badge-live'}">
+                  ${isSimulated ? '🟡 Sandbox Simulation Mode' : '🟢 Live Carrier Delivery Confirmed'}
+                </div>
+                <div class="sub-result-meta">
+                  <span>Ward: <strong>${res.ward_name}</strong> [${res.ward_id}]</span>
+                  <span>SID: <code>${res.message_id || 'SM-DEMO-SIM'}</code></span>
+                </div>
+              </div>
+
+              <div class="sub-message-preview">
+                <div class="preview-title-row">
+                  <span class="preview-sender">${channelIcon} ${channelUpper} Notification to <strong>${res.phone_number}</strong></span>
+                  <span class="preview-time">Just Now</span>
+                </div>
+                <div class="preview-bubble">
+                  "${res.confirmation_text || res.message}"
+                </div>
+              </div>
+
+              ${actionBtnHtml}
+
+              <div class="sub-status-explanation">
+                ${isSimulated ? `
+                  <strong>ℹ️ Why Sandbox Mode?</strong> Indian TRAI DLT regulations and Meta WhatsApp policies require commercial business credentials to push cellular broadcasts to unverified personal phones. In this SIH demonstration, your subscription is registered in the database, and alerts are simulated. <strong>Click the button above to view or send this message directly in your WhatsApp!</strong>
+                ` : `
+                  <strong>✅ Automated Alerts Active:</strong> Live alerts will be dispatched directly to your mobile whenever extreme heat conditions are forecast.
+                `}
+              </div>
+            </div>
           `;
+
+          // Trigger native Web Notification if supported and permitted
+          if (typeof window !== "undefined" && "Notification" in window) {
+            if (Notification.permission === "granted") {
+              try {
+                new Notification(`SIH Heatwave Alert - ${res.ward_name}`, {
+                  body: res.confirmation_text || `Subscribed to heat alerts for ${res.ward_name}!`,
+                  icon: "https://leafletjs.com/examples/quick-start/favicon.ico"
+                });
+              } catch (_) {}
+            } else if (Notification.permission !== "denied") {
+              Notification.requestPermission();
+            }
+          }
         }
         if (phoneInput) phoneInput.value = "";
       } catch (err) {
@@ -1837,7 +1906,16 @@ function bindAlertSubscription() {
         if (feedbackBanner) {
           feedbackBanner.style.display = "block";
           feedbackBanner.className = "sub-feedback-banner error";
-          feedbackBanner.innerHTML = `<strong>⚠️ Subscription Failed:</strong> ${err.message}`;
+          feedbackBanner.innerHTML = `
+            <div class="sub-error-content">
+              <strong>⚠️ Subscription Failed:</strong> ${err.message}
+              ${err.message && (err.message.includes("Not Found") || err.message.includes("404")) ? `
+                <div style="margin-top: 4px; font-size: 0.74rem; color: #fecaca;">
+                  The backend API service is syncing its latest updates. Please wait 1-2 minutes and retry.
+                </div>
+              ` : ""}
+            </div>
+          `;
         }
       } finally {
         if (submitBtn) {
@@ -1887,7 +1965,21 @@ function bindAlertSubscription() {
         if (unsubFeedback) {
           unsubFeedback.style.display = "block";
           unsubFeedback.className = "sub-feedback-banner success";
-          unsubFeedback.textContent = res.message || "Successfully unsubscribed from alerts.";
+          unsubFeedback.innerHTML = `
+            <div class="sub-result-card">
+              <div class="sub-result-header">
+                <div class="sub-result-badge badge-live">🔕 Alert Unsubscription Confirmed</div>
+              </div>
+              <p style="margin: 6px 0 4px 0; color: #86efac; font-size: 0.8rem; font-weight: 600;">
+                ${res.message || "Successfully unsubscribed from alerts."}
+              </p>
+              ${res.confirmation_text ? `
+                <div class="preview-bubble" style="margin-top: 6px; font-size: 0.74rem;">
+                  "${res.confirmation_text}"
+                </div>
+              ` : ""}
+            </div>
+          `;
         }
         if (unsubPhoneInput) unsubPhoneInput.value = "";
       } catch (err) {

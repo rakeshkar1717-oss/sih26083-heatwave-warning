@@ -239,6 +239,14 @@ def send_ward_alert(
         db.add(log_entry)
         db.commit()
 
+    # Determine delivery mode and quick action URLs
+    is_live = bool(settings.twilio_account_sid and not settings.twilio_account_sid.startswith("mock_"))
+    phone_digits = "".join(c for c in recipient_phone if c.isdigit())
+    import urllib.parse
+    encoded_advisory = urllib.parse.quote(advisory_message)
+    whatsapp_url = f"https://api.whatsapp.com/send?phone={phone_digits}&text={encoded_advisory}"
+    sms_url = f"sms:{recipient_phone}?body={encoded_advisory}"
+
     return AlertResponse(
         success=dispatch_result.get("success", True),
         message_id=dispatch_result.get("message_id", f"MSG-{uuid.uuid4().hex[:8].upper()}"),
@@ -247,6 +255,10 @@ def send_ward_alert(
         channel=channel,
         dispatched_at=now_utc,
         detail=dispatch_result.get("detail", f"Dispatched alert for {ward_name} ({risk_level.value})."),
+        message_text=advisory_message,
+        delivery_mode="live" if is_live else "simulated",
+        whatsapp_url=whatsapp_url,
+        sms_url=sms_url,
     )
 
 

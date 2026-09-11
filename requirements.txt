@@ -13,6 +13,7 @@ cdsapi>=0.7.0
 pydantic>=2.7.0
 pydantic-settings>=2.2.0
 python-dotenv>=1.0.1
+phonenumbers>=9.0.0
 
 # API server & testing client
 fastapi>=0.110.0

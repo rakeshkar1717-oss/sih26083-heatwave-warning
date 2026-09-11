@@ -7,12 +7,18 @@ and compliance-mandated STOP keyword webhook handling.
 
 import re
 import logging
+import urllib.parse
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
 
-import phonenumbers
-from phonenumbers import NumberParseException
+try:
+    import phonenumbers
+    from phonenumbers import NumberParseException
+    HAS_PHONENUMBERS = True
+except ImportError:
+    HAS_PHONENUMBERS = False
+    NumberParseException = Exception
 
 from backend.config import settings
 from backend.db.session import SessionLocal
@@ -63,24 +69,38 @@ def normalize_and_validate_phone(raw_phone: str) -> str:
     if cleaned.startswith("whatsapp:"):
         cleaned = cleaned.replace("whatsapp:", "")
 
-    # Prepend '+' if missing and starts with 91
+    # Prepend '+' if missing and starts with 91 or 10-digit Indian mobile
     if not cleaned.startswith("+"):
-        if len(cleaned) == 10 and cleaned[0] in "6789":
+        if len(cleaned) == 10 and cleaned[0] in "56789":
             cleaned = "+91" + cleaned
         elif len(cleaned) == 12 and cleaned.startswith("91"):
             cleaned = "+" + cleaned
 
-    try:
-        parsed = phonenumbers.parse(cleaned, "IN")
-        if not phonenumbers.is_valid_number(parsed):
-            raise ValueError(f"Phone number '{raw_phone}' is not a valid recognized telephone number.")
-        return phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
-    except NumberParseException as e:
-        # Fallback to strict E.164 regex if phonenumbers parser fails
+    if HAS_PHONENUMBERS:
+        try:
+            parsed = phonenumbers.parse(cleaned, "IN")
+            if not phonenumbers.is_valid_number(parsed):
+                raise ValueError(f"Phone number '{raw_phone}' is not a valid recognized telephone number.")
+            return phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+        except NumberParseException as e:
+            # Fallback to strict E.164 regex if phonenumbers parser fails
+            e164_pattern = re.compile(r"^\+[1-9]\d{9,14}$")
+            if e164_pattern.match(cleaned):
+                return cleaned
+            raise ValueError(f"Invalid phone number format '{raw_phone}': {e}")
+    else:
+        # Resilient fallback if phonenumbers library is not installed
         e164_pattern = re.compile(r"^\+[1-9]\d{9,14}$")
         if e164_pattern.match(cleaned):
             return cleaned
-        raise ValueError(f"Invalid phone number format '{raw_phone}': {e}")
+        digits = re.sub(r"[^\d]", "", cleaned)
+        if len(digits) == 10 and digits[0] in "56789":
+            return f"+91{digits}"
+        elif len(digits) == 12 and digits.startswith("91"):
+            return f"+{digits}"
+        elif len(digits) >= 10:
+            return f"+{digits}"
+        raise ValueError(f"Invalid phone number format '{raw_phone}'. Must have at least 10 valid digits.")
 
 
 def check_rate_limit(phone_number: str, db: Session) -> None:
@@ -241,14 +261,31 @@ def subscribe(
     db.add(consent_entry)
     db.commit()
 
+    # Determine delivery mode and IDs
+    is_live = bool(settings.twilio_account_sid and not settings.twilio_account_sid.startswith("mock_"))
+    delivery_mode = "live" if is_live else "simulated"
+    msg_id = dispatch_result.get("message_id") if isinstance(dispatch_result, dict) else None
+
+    # Generate quick-action URLs for user device
+    phone_digits = re.sub(r"[^\d]", "", normalized_phone)
+    encoded_text = urllib.parse.quote(confirm_msg)
+    whatsapp_url = f"https://api.whatsapp.com/send?phone={phone_digits}&text={encoded_text}"
+    sms_url = f"sms:{normalized_phone}?body={encoded_text}"
+
     return SubscribeResponse(
         success=True,
-        message=f"Subscribed successfully to {resolved_ward_name}. Confirmation message sent.",
+        message=f"Subscribed successfully to {resolved_ward_name}. Confirmation message dispatched.",
         phone_number=normalized_phone,
         ward_id=resolved_ward_id,
         ward_name=resolved_ward_name,
         channel=channel.value,
         is_new=is_new,
+        delivery_mode=delivery_mode,
+        delivery_status=delivery_status,
+        message_id=msg_id,
+        confirmation_text=confirm_msg,
+        whatsapp_url=whatsapp_url,
+        sms_url=sms_url,
     )
 
 
@@ -324,11 +361,17 @@ def unsubscribe(
         else f"No active alert subscriptions were found for {normalized_phone}."
     )
 
+    phone_digits = re.sub(r"[^\d]", "", normalized_phone)
+    encoded_unsub = urllib.parse.quote(unsub_msg)
+    whatsapp_url = f"https://api.whatsapp.com/send?phone={phone_digits}&text={encoded_unsub}"
+
     return UnsubscribeResponse(
         success=True,
         message=msg,
         phone_number=normalized_phone,
         deactivated_count=deactivated_count,
+        confirmation_text=unsub_msg,
+        whatsapp_url=whatsapp_url,
     )
 
 

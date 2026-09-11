@@ -410,3 +410,36 @@ def test_alert_engine_dispatches_to_active_subscribers(db_session):
     db_session.delete(reading)
     db_session.query(AlertLog).filter(AlertLog.recipient_phone == test_phone).delete()
     db_session.commit()
+
+
+def test_subscribe_enriched_response_fields(test_client, db_session):
+    """Verify SubscribeResponse contains delivery_mode, message_id, confirmation_text, and action URLs."""
+    phone = "+919641638003"
+    # Clean prior
+    db_session.query(AlertSubscriber).filter(AlertSubscriber.phone_number == phone).delete()
+    db_session.query(ConsentLog).filter(ConsentLog.phone_number == phone).delete()
+    db_session.commit()
+
+    resp = test_client.post(
+        "/api/subscribe",
+        json={
+            "phone_number": phone,
+            "ward_id": "AMD_17",
+            "channel": "whatsapp",
+        },
+    )
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["success"] is True
+    assert data["phone_number"] == phone
+    assert data["ward_id"] == "AMD_17"
+    assert data["channel"] == "whatsapp"
+    assert data["delivery_mode"] in ["live", "simulated"]
+    assert "confirmation_text" in data and len(data["confirmation_text"]) > 0
+    assert "whatsapp_url" in data and "api.whatsapp.com" in data["whatsapp_url"]
+    assert "9641638003" in data["whatsapp_url"]
+
+    # Cleanup
+    db_session.query(AlertSubscriber).filter(AlertSubscriber.phone_number == phone).delete()
+    db_session.query(ConsentLog).filter(ConsentLog.phone_number == phone).delete()
+    db_session.commit()

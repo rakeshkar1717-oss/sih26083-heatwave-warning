@@ -34,6 +34,12 @@ class SubscribeResponse(BaseModel):
     ward_name: str
     channel: str
     is_new: bool = True
+    delivery_mode: str = Field(default="simulated", description="'live' (Twilio/Gupshup) or 'simulated' (Sandbox simulator)")
+    delivery_status: str = Field(default="delivered", description="Carrier delivery state")
+    message_id: Optional[str] = Field(default=None, description="Carrier message SID or simulator tracking ID")
+    confirmation_text: Optional[str] = Field(default=None, description="Exact text of the dispatched notification")
+    whatsapp_url: Optional[str] = Field(default=None, description="Direct WhatsApp Web/App click-to-send link")
+    sms_url: Optional[str] = Field(default=None, description="Direct SMS click-to-send link")
 
 
 class UnsubscribeRequest(BaseModel):
@@ -50,6 +56,8 @@ class UnsubscribeResponse(BaseModel):
     message: str
     phone_number: str
     deactivated_count: int
+    confirmation_text: Optional[str] = Field(default=None, description="Unsubscribe notice text")
+    whatsapp_url: Optional[str] = Field(default=None, description="Direct WhatsApp link")
 
 
 class InboundWebhookResponse(BaseModel):

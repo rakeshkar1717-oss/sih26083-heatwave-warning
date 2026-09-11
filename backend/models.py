@@ -350,6 +350,10 @@ class AlertResponse(BaseModel):
     channel: AlertChannel
     dispatched_at: datetime = Field(default_factory=datetime.utcnow)
     detail: str
+    message_text: Optional[str] = Field(default=None, description="Actual health advisory text transmitted")
+    delivery_mode: str = Field(default="simulated", description="'live' or 'simulated'")
+    whatsapp_url: Optional[str] = Field(default=None, description="Direct WhatsApp Web click-to-send URL")
+    sms_url: Optional[str] = Field(default=None, description="Direct SMS click-to-send URL")
 
 
 # ==============================================================================

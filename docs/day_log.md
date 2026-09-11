@@ -935,5 +935,27 @@ Implement an anonymous, account-free **Phone/WhatsApp Alert Subscription** subsy
 - **Full Test Suite Status**: **114 passed, 0 failed (100% pass rate)** in 6.57s.
 - **End-to-End Sandbox Demonstration (`demo_subscription_flow.py`)**: Executed full lifecycle (Subscribe -> Confirmation text -> Hazard spike automated alert -> Inbound STOP reply webhook deactivation -> Audit log verification) with 100% success.
 
+---
+
+## [Day 18 Hotfix & Message Delivery Enhancement] Production Cloud Deployment & Interactive Visual Delivery
+
+### Root Cause Diagnosis & Resolution
+1. **HTTP 404 "Not Found" on Live Cloud Deployment**:
+   - `phonenumbers` was installed locally but omitted from `requirements.txt`. When Render deployed `88d09f7`, `pip install -r requirements.txt` ran without `phonenumbers`, causing `uvicorn backend.api.main:app` to crash during startup with `ModuleNotFoundError: No module named 'phonenumbers'`.
+   - Render maintained the previous operational build (`8ba919a`), which lacked `/api/subscribe`.
+   - **Fix**: Added `phonenumbers>=9.0.0` to `requirements.txt` and engineered a defensive regex fallback in `backend/subscriptions/subscription_service.py` so the service never crashes even if `phonenumbers` is missing.
+2. **"Not sending any kind of message" Resolution**:
+   - In environments without active paid Twilio/Gupshup credentials, the backend operates in **Twilio Sandbox Simulator Mode**.
+   - Previously, simulated delivery only logged to the server terminal, leaving the end-user without visual confirmation on their personal phone.
+   - **Fix**:
+     - Enriched `SubscribeResponse`, `UnsubscribeResponse`, and `AlertResponse` with `delivery_mode` (`live` vs `simulated`), `confirmation_text`, `message_id`, `whatsapp_url`, and `sms_url`.
+     - Upgraded the frontend alert signup widget in `frontend/main.js` and `frontend/style.css` to render an **interactive message preview card**:
+       - Authentically styled SMS/WhatsApp chat bubble showing the exact dispatched text and tracking SID.
+       - Direct 1-click **"💬 Open in WhatsApp / Send Alert Now"** action button (`https://api.whatsapp.com/send?phone=...&text=...`) allowing users to immediately open or send the alert in their WhatsApp app or WhatsApp Web.
+       - Native HTML5 **Web Push Notifications** triggering physical device desktop/mobile alerts.
+       - Informative regulatory banner explaining sandbox simulation vs. live telecom gateway requirements.
+3. **Verification**:
+   - All 115 unit and integration tests passing (`115 passed, 0 failed`).
+
 
 
